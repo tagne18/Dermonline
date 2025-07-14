@@ -1,0 +1,220 @@
+/* Importation de FontAwesome pour des icônes modernes */
+@import url('https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css');
+
+/* Styles généraux */
+body {
+    font-family: 'Poppins', sans-serif;
+    background-color: #f4f6f9;
+    margin: 0;
+    padding-top: 60px; /* Pour ne pas cacher le contenu sous la barre horizontale */
+}
+
+/* Barre horizontale */
+.header-bar {
+    background: linear-gradient(45deg, #321de7, #7092f0);
+    color: white;
+    padding: 15px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    position: fixed;
+    width: 100%;
+    top: 0;
+    left: 0;
+    z-index: 1000;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    transition: all 0.3s ease-in-out;
+}
+
+.header-bar .active-section {
+    font-size: 18px;
+    font-weight: bold;
+    display: flex;
+    align-items: center;
+}
+
+.header-bar .search-bar input {
+    width: 250px;
+    padding: 10px;
+    border: none;
+    border-radius: 20px;
+    outline: none;
+    transition: all 0.3s ease-in-out;
+}
+
+.header-bar .search-bar input:focus {
+    width: 280px;
+    box-shadow: 0 0 8px rgba(255, 255, 255, 0.5);
+}
+
+/* Effet dynamique de survol */
+.header-bar:hover {
+    box-shadow: 0px 5px 15px rgba(0, 0, 0, 0.2);
+}
+
+/* Barre latérale */
+.sidebar {
+    width: 260px;
+    height: 100vh;
+    background: linear-gradient(45deg, #4649f593, #1b1eda);
+    color: white;
+    padding: 20px;
+    position: fixed;
+    top: 60px;
+    left: 0;
+    bottom: 0;
+    overflow-y: auto;
+    box-shadow: 4px 0 10px rgba(0, 0, 0, 0.2);
+    transition: all 0.3s ease-in-out;
+}
+
+/* Profil utilisateur */
+.sidebar .profile {
+    text-align: center;
+    margin-bottom: 20px;
+    animation: fadeIn 1s ease-in-out;
+}
+
+.sidebar .profile img {
+    width: 90px;
+    height: 90px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 3px solid red;
+    box-shadow: 0 0 10px rgba(255, 255, 255, 0.3);
+    transition: transform 0.3s ease-in-out;
+}
+
+.sidebar .profile img:hover {
+    transform: scale(1.1);
+}
+
+.sidebar .profile h4 {
+    margin-top: 10px;
+    font-size: 18px;
+    font-weight: bold;
+}
+
+/* Liens de navigation */
+.sidebar .nav {
+    list-style: none;
+    padding: 0;
+}
+
+.sidebar .nav-item {
+    margin-bottom: 10px;
+}
+
+.sidebar .nav-link {
+    padding: 12px;
+    font-size: 16px;
+    color: white;
+    display: flex;
+    align-items: center;
+    text-decoration: none;
+    transition: all 0.3s ease-in-out;
+    border-radius: 8px;
+    background: rgba(255, 255, 255, 0.1);
+    animation: slideInLeft 0.8s ease-in-out;
+}
+
+.sidebar .nav-link i {
+    margin-right: 12px;
+    font-size: 20px;
+}
+
+/* Effet au survol */
+.sidebar .nav-link:hover {
+    background: rgba(255, 255, 255, 0.3);
+    transform: translateX(5px);
+}
+
+.sidebar .nav-link.active {
+    background: rgba(255, 255, 255, 0.3);
+    transform: scale(1.05);
+}
+
+/* Contenu principal */
+.content {
+    margin-left: 260px;
+    padding: 30px;
+    transition: margin-left 0.3s;
+}
+
+.card {
+    background: white;
+    padding: 20px;
+    border-radius: 12px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    transition: transform 0.3s ease-in-out;
+    animation: fadeInUp 1s ease-in-out;
+}
+
+.card:hover {
+    transform: translateY(-5px);
+}
+
+/* Effet responsive */
+@media (max-width: 768px) {
+    .sidebar {
+        width: 80px;
+        text-align: center;
+    }
+
+    .sidebar .profile img {
+        width: 50px;
+        height: 50px;
+    }
+
+    .sidebar .profile h4 {
+        display: none;
+    }
+
+    .sidebar .nav-link {
+        font-size: 0;
+        justify-content: center;
+    }
+
+    .sidebar .nav-link i {
+        font-size: 24px;
+        margin-right: 0;
+    }
+
+    .content {
+        margin-left: 80px;
+    }
+}
+
+/* 🎬 Animations */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: scale(0.9);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+@keyframes slideInLeft {
+    from {
+        opacity: 0;
+        transform: translateX(-50px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
