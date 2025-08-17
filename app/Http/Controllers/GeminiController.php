@@ -7,6 +7,48 @@ use Illuminate\Support\Facades\Http;
 
 class GeminiController extends Controller
 {
+    public function analyzeImage(Request $request)
+    {
+        $request->validate([
+            'image' => 'required|image|max:4096',
+        ]);
+        $user = auth()->user();
+
+        // Sauvegarde de l'image
+        $path = $request->file('image')->store('analyses', 'public');
+
+        // Appel API Gemini Vision (à adapter selon votre clé et modèle)
+        $imageContent = base64_encode(file_get_contents($request->file('image')->getRealPath()));
+        $apiKey = env('GEMINI_API_KEY');
+        $response = \Http::withHeaders([
+            'Content-Type' => 'application/json',
+        ])->post('https://generativelanguage.googleapis.com/v1beta/models/gemini-pro-vision:generateContent?key=' . $apiKey, [
+            'contents' => [
+                [
+                    'parts' => [
+                        ['text' => "Tu es un assistant dermatologique expert. Analyse l’image transmise et donne une description clinique détaillée des lésions (rougeur, boutons, comédons, plaques, etc.). Propose des hypothèses (acné, eczéma, psoriasis, mycose, etc.) en précisant qu’il s’agit d’une aide informative, jamais d’un diagnostic ferme. Réponds uniquement en français, de façon claire et pédagogique."],
+                        ['inlineData' => [
+                            'mimeType' => $request->file('image')->getMimeType(),
+                            'data' => $imageContent
+                        ]]
+                    ]
+                ]
+            ]
+        ]);
+        \Log::info('Gemini response', ['body' => $response->json()]);
+        $result = $response->json('candidates.0.content.parts.0.text') ?? 'Aucune analyse disponible.';
+        // Sauvegarde en base
+        $analysis = \App\Models\ImageAnalysis::create([
+            'user_id' => $user->id,
+            'image_path' => $path,
+            'result' => $result,
+        ]);
+        return response()->json([
+            'success' => true,
+            'response' => $result
+        ]);
+    }
+
     public function ask(Request $request)
     {
         $request->validate([
@@ -82,6 +124,7 @@ PROMPT;
                     'line' => $e->getLine()
                 ]
             ]);
+            
         }
     }
 }

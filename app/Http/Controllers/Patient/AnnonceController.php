@@ -9,7 +9,29 @@ class AnnonceController extends Controller
 {
     public function index()
     {
-        $annonces = Annonce::latest()->get(); // Tu peux filtrer par `->where('visible', true)` si nécessaire
+        // Récupérer les annonces des médecins avec leurs informations utilisateur
+        $annoncesMedecins = \App\Models\NewAnnonce::with('user')
+            ->whereHas('user', function($query) {
+                $query->where('role', 'medecin');
+            })
+            ->latest()
+            ->get()
+            ->map(function($annonce) {
+                $annonce->type = 'medecin';
+                return $annonce;
+            });
+
+        // Récupérer les annonces de l'administrateur
+        $annoncesAdmin = Annonce::latest()->get()
+            ->map(function($annonce) {
+                $annonce->type = 'admin';
+                return $annonce;
+            });
+
+        // Fusionner et trier par date de création
+        $annonces = $annoncesMedecins->merge($annoncesAdmin)
+            ->sortByDesc('created_at');
+
         return view('patient.annonces.index', compact('annonces'));
     }
 }

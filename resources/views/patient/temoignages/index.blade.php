@@ -5,14 +5,24 @@
         </h2>
     </x-slot>
 
+    @foreach(auth()->user()->notifications as $notification)
+    @if(isset($notification->data['message']))
+        <div class="alert alert-info mb-2">
+            {{ $notification->data['message'] }}
+            <br>
+            <small>{{ $notification->created_at->format('d/m/Y H:i') }}</small>
+        </div>
+    @endif
+@endforeach
+
     <div class="py-12">
-        <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
+        <div class="max-w-7xl mx-auto ">
             <div class="mb-4 btn btn-success">
                 <a href="{{ route('patient.temoignages.create') }}" class="btn btn-success hover:bg-blue-700  font-bold py-2 px-4 rounded">
                     Ajouter un témoignage
                 </a>
             </div>
-            <div class="overflow-hidden  sm:rounded-lg p-6">
+            <div class="overflow-hidden  sm:rounded-lg p-4">
 
 
                 @if (session('success'))
@@ -22,7 +32,7 @@
                 @endif
 
                 @if ($testimonials->isEmpty())
-                    <p>Aucun témoignage disponible pour le moment. tt</p>
+                    <p>Aucun témoignage disponible pour le moment.</p>
                 @else
                     <div class="grid gap-4">
                         @foreach ($testimonials as $testimonial)

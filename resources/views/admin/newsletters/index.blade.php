@@ -3,7 +3,7 @@
 @section('title', 'Abonnés Newsletter')
 
 @section('content')
-    <h1 class="text-2xl font-bold mb-6">📰 Abonnés à la Newsletter</h1>
+    <h1 class="text-2xl font-bold mb-6 text-white">📰 Abonnés à la Newsletter</h1>
 
     @if(session('success'))
         <div class="alert alert-success">{{ session('success') }}</div>
@@ -13,11 +13,11 @@
         <form method="POST" action="{{ route('admin.newsletters.send') }}">
             @csrf
             <div class="mb-3">
-                <label for="subject" class="form-label">Sujet de l'email</label>
+                <label for="subject" class="form-label text-white">Sujet de l'email</label>
                 <input type="text" name="subject" id="subject" class="form-control" required>
             </div>
             <div class="mb-3">
-                <label for="content" class="form-label">Contenu du message</label>
+                <label for="content" class="form-label text-white">Contenu du message</label>
                 <textarea name="content" id="content" class="form-control" rows="4" required></textarea>
             </div>
             <button type="submit" class="btn btn-primary">Envoyer à tous les abonnés</button>

@@ -9,6 +9,10 @@ class MessageController extends Controller
 {
     public function index()
     {
-        return view('patient.messages.index'); 
+        $messages = \App\Models\Message::where('receiver_id', auth()->id())
+            ->orderBy('created_at', 'desc')
+            ->with('sender')
+            ->get();
+        return view('patient.messages.index', compact('messages'));
     }
 }

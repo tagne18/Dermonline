@@ -10,6 +10,10 @@ use Laravel\Fortify\TwoFactorAuthenticatable;
 use Laravel\Jetstream\HasProfilePhoto;
 use Laravel\Sanctum\HasApiTokens;
 use Illuminate\Support\Facades\Storage;
+use App\Models\RendezVous;
+use App\Models\Consultation;
+use App\Models\Paiement;
+use App\Models\Notification;
 
 class User extends Authenticatable implements MustVerifyEmail
 {
@@ -20,9 +24,46 @@ class User extends Authenticatable implements MustVerifyEmail
      *
      * @var array<int, string>
      */
-    public function adminProfile()
+    // Les relations existantes sont conservées, nous n'ajoutons que celles qui n'existent pas
+    
+    /**
+     * Relation avec les rendez-vous en tant que médecin
+     */
+    public function medecinRendezVous()
     {
-        return $this->hasOne(Admin::class);
+        return $this->hasMany(RendezVous::class, 'medecin_id');
+    }
+    
+    /**
+     * Relation avec les rendez-vous en tant que patient
+     */
+    public function patientRendezVous()
+    {
+        return $this->hasMany(RendezVous::class, 'patient_id');
+    }
+
+    /**
+     * Relation avec les consultations en tant que médecin
+     */
+    public function medecinConsultations()
+    {
+        return $this->hasMany(Consultation::class, 'medecin_id');
+    }
+
+    /**
+     * Relation avec les paiements reçus (pour les médecins)
+     */
+    public function medecinPaiements()
+    {
+        return $this->hasMany(Paiement::class, 'medecin_id');
+    }
+
+    /**
+     * Relation avec les notifications
+     */
+    public function userNotifications()
+    {
+        return $this->hasMany(Notification::class);
     }
 
     protected $fillable = [
@@ -79,22 +120,60 @@ class User extends Authenticatable implements MustVerifyEmail
         ];
     }
 
+    /**
+     * Get the URL to the user's profile photo.
+     *
+     * @return string
+     */
     public function getProfilePhotoUrlAttribute()
     {
-        return $this->profile_photo_path
-            ? Storage::disk($this->profilePhotoDisk())->url($this->profile_photo_path)
-            : asset('images/default.jpeg');
+        if ($this->profile_photo_path) {
+            // Si le chemin commence par http, c'est déjà une URL complète
+            if (str_starts_with($this->profile_photo_path, 'http')) {
+                return $this->profile_photo_path;
+            }
+            
+            // Vérifier si le fichier existe dans le stockage
+            if (Storage::disk($this->profilePhotoDisk())->exists($this->profile_photo_path)) {
+                return Storage::disk($this->profilePhotoDisk())->url($this->profile_photo_path);
+            }
+            
+            // Si le fichier n'existe pas, retourner une image par défaut
+            return $this->defaultProfilePhotoUrl();
+        }
+        
+        // Si aucune photo de profil n'est définie, utiliser l'avatar par défaut
+        return $this->defaultProfilePhotoUrl();
     }
     
-    public function abonnement()
-    {
-        return $this->hasOne(Abonnement::class);
-    }
-
     /**
-     * Relation pour les médecins : obtenir tous les patients abonnés
+     * Get the default profile photo URL if no profile photo has been uploaded.
+     *
+     * @return string
      */
-    public function abonnes()
+    protected function defaultProfilePhotoUrl()
+    {
+        $name = trim(collect(explode(' ', $this->name))->map(function ($segment) {
+            return mb_substr($segment, 0, 1);
+        })->join(' '));
+        
+        return 'https://ui-avatars.com/api/?name='.urlencode($name).'&color=7F9CF5&background=EBF4FF';
+    }
+    
+    /**
+     * Get the disk that profile photos should be stored on.
+     *
+     * @return string
+     */
+    protected function profilePhotoDisk()
+    {
+        return 'public';
+    }
+    
+    /**
+     * Relation pour les médecins : obtenir tous les abonnements de patients
+     */
+    public function abonnements()
     {
         return $this->hasMany(Abonnement::class, 'medecin_id');
     }
@@ -102,9 +181,20 @@ class User extends Authenticatable implements MustVerifyEmail
     /**
      * Relation pour les patients : obtenir leur abonnement
      */
-    public function patientAbonnement()
+    public function abonnement()
     {
         return $this->hasOne(Abonnement::class, 'user_id');
+    }
+    
+    /**
+     * Relation pour les médecins : obtenir les patients abonnés
+     * Cette méthode permet de récupérer tous les patients qui sont abonnés à ce médecin
+     */
+    public function abonnes()
+    {
+        return $this->belongsToMany(User::class, 'abonnements', 'medecin_id', 'user_id')
+            ->wherePivot('statut', 'actif')
+            ->withTimestamps();
     }
 
     public function appointments()

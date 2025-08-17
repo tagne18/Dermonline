@@ -11,13 +11,13 @@
                 <form method="POST" action="{{ route('patient.temoignages.store') }}" enctype="multipart/form-data">
                     @csrf
 
-                    {{-- <div class="mb-4">
+                    <div class="mb-4">
                         <label for="name" class="block text-gray-700">Nom</label>
                         <input type="text" id="name" name="name" class="w-full border-gray-300 rounded @error('name') border-red-500 @enderror" value="{{ old('name', Auth::user()->name) }}" required>
                         @error('name')
                             <p class="text-red-500 text-sm">{{ $message }}</p>
                         @enderror
-                    </div> --}}
+                    </div> 
 
                     <div class="mb-4">
                         <label for="content" class="block text-gray-700">Témoignage</label>

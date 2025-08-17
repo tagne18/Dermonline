@@ -7,6 +7,7 @@ use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\Rule;
 use Livewire\Component;
 use Livewire\WithFileUploads;
+use Illuminate\Support\Facades\File;
 
 class UpdateProfileInformationForm extends Component
 {
@@ -45,6 +46,11 @@ class UpdateProfileInformationForm extends Component
                 $user->forceFill([
                     'profile_photo_path' => $path,
                 ])->save();
+                // Synchronisation automatique 100% PHP
+                File::copyDirectory(
+                    storage_path('app/public/profile-photos'),
+                    public_path('storage/profile-photos')
+                );
                 // Recharge l'utilisateur avec la nouvelle image (évite le cache)
                 $this->user = $user->fresh();
                 $this->emit('profilePhotoUpdated'); // Event pour forcer le rafraîchissement côté front

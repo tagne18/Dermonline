@@ -42,11 +42,28 @@
 
                     <x-nav-link href="{{ route('patient.consultations.index') }}" :active="request()->routeIs('consultation.*')"
                                 class="flex items-center space-x-2 px-4 py-2 rounded-lg transition-all duration-300 hover:bg-white/10 hover:scale-105">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
-                        </svg>
-                        <span>{{ __('Consultations') }}</span>
-                    </x-nav-link>
+    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+    </svg>
+    <span>{{ __('Consultations') }}</span>
+</x-nav-link>
+
+<x-nav-link href="{{ route('patient.ordonnances') }}" :active="request()->routeIs('patient.ordonnances*')"
+            class="flex items-center space-x-2 px-4 py-2 rounded-lg transition-all duration-300 hover:bg-white/10 hover:scale-105">
+    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+    </svg>
+    <span>Ordonnances</span>
+</x-nav-link>
+
+<x-nav-link href="{{ route('patient.examens') }}" :active="request()->routeIs('patient.examens*')"
+            class="flex items-center space-x-2 px-4 py-2 rounded-lg transition-all duration-300 hover:bg-white/10 hover:scale-105">
+    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0zm6 8a9 9 0 11-18 0 9 9 0 0118 0z" />
+    </svg>
+    <span>Examens</span>
+</x-nav-link>
+
 
                     <x-nav-link href="{{ route('patient.documents.index') }}" :active="request()->routeIs('documents.*')"
                                 class="flex items-center space-x-2 px-4 py-2 rounded-lg transition-all duration-300 hover:bg-white/10 hover:scale-105">
@@ -62,6 +79,15 @@
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"></path>
                         </svg>
                         <span>{{ __('Messagerie') }}</span>
+                    </x-nav-link>
+
+                    <x-nav-link href="{{ route('patient.pharmacies.index') }}" :active="request()->routeIs('pharmacies.*')"
+                        class="flex items-center space-x-2 px-4 py-2 rounded-lg transition-all duration-300 hover:bg-green-50 hover:scale-105">
+                        <svg class="w-5 h-5" fill="none" stroke="#24b47e" viewBox="0 0 24 24">
+                            <circle cx="12" cy="12" r="10" stroke="#24b47e" stroke-width="2" fill="#e5faf3"/>
+                            <path d="M12 8v8M8 12h8" stroke="#24b47e" stroke-width="2" stroke-linecap="round"/>
+                        </svg>
+                        <span style="color:#24b47e;">{{ __('Pharmacies') }}</span>
                     </x-nav-link>
 
                     <x-nav-link href="{{ route('patient.abonnements.index') }}" :active="request()->routeIs('abonnements.*')"
@@ -148,8 +174,10 @@
                     <x-dropdown align="right" width="48">
                         <x-slot name="trigger">
                             @if (Laravel\Jetstream\Jetstream::managesProfilePhotos())
-                                <button class="flex text-sm border-2 border-transparent rounded-full focus:outline-none focus:border-white/50 transition-all duration-300 hover:scale-110">
-                                    <img class="size-10 rounded-full object-cover ring-2 ring-white/30" src="{{ Auth::user()->profile_photo_url }}" alt="{{ Auth::user()->name }}" />
+                                <button class="flex text-sm border-4 border-white shadow-2xl rounded-full focus:outline-none focus:border-blue-400 transition-all duration-300 hover:scale-110 bg-white" style="box-shadow:0 0 0 6px #e3f0ff, 0 8px 32px rgba(0,0,0,0.15);">
+                                    <span style="display:inline-block;width:56px;height:56px;border-radius:50%;overflow:hidden;border:4px solid #fff;background:#fff;box-shadow:0 0 0 4px #90cdf4,0 4px 18px rgba(0,0,0,0.14);">
+                                        <img src="{{ Auth::user()->profile_photo_url }}" alt="{{ Auth::user()->name }}" style="width:100%;height:100%;object-fit:cover;display:block;" />
+                                    </span>
                                 </button>
                             @else
                                 <span class="inline-flex rounded-lg">

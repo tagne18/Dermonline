@@ -19,7 +19,23 @@ class TemoignageController extends Controller
         $testimonial = Testimonial::findOrFail($id);
         $testimonial->approved = true;
         $testimonial->save();
+        // Notifier le patient (validation)
+        if ($testimonial->user) {
+            $testimonial->user->notify(new \App\Notifications\TestimonialStatusNotification($testimonial, 'validé'));
+        }
         return redirect()->route('admin.testimonials')->with('success', 'Témoignage approuvé.');
+    }
+
+    public function refuse($id)
+    {
+        $testimonial = Testimonial::findOrFail($id);
+        $testimonial->approved = false;
+        $testimonial->save();
+        // Notifier le patient (refus)
+        if ($testimonial->user) {
+            $testimonial->user->notify(new \App\Notifications\TestimonialStatusNotification($testimonial, 'refusé'));
+        }
+        return redirect()->route('admin.testimonials')->with('success', 'Témoignage refusé.');
     }
 
     public function destroy($id)

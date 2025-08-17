@@ -88,4 +88,27 @@ class AnnonceController extends Controller
         $rdv->patient->notify(new AppointmentStatusNotification($rdv, 'refusé'));
         return back()->with('success', 'Rendez-vous refusé. Le patient a été notifié.');
     }
+
+    /**
+     * Reprogrammer un rendez-vous (proposer une nouvelle date/heure au patient)
+     */
+    public function rescheduleRdv(Request $request)
+    {
+        $request->validate([
+            'appointment_id' => 'required|exists:appointments,id',
+            'new_date' => 'required|date|after:today',
+            'new_time' => 'required',
+        ]);
+        $rdv = Appointment::findOrFail($request->appointment_id);
+        $rdv->proposed_date = $request->new_date;
+        $rdv->proposed_time = $request->new_time;
+        $rdv->statut = 'reprogramme'; // statut personnalisé
+        $rdv->save();
+        // Notifier le patient (notification personnalisée à créer si besoin)
+        if ($rdv->patient) {
+            $rdv->patient->notify(new AppointmentStatusNotification($rdv, 'proposé'));
+        }
+        return back()->with('success', 'Proposition de reprogrammation envoyée au patient. Il doit valider ou refuser.');
+    }
 }
+

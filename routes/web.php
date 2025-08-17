@@ -12,7 +12,8 @@ use App\Http\Controllers\Admin\{
     AbonnementController,
     DoctorApplicationController as AdminDoctorApplicationController,
     ContactController,
-    NewsletterController
+    NewsletterController,
+    ProfileController as AdminProfileController
 };
 use App\Http\Controllers\Patient\{
    AnnonceController as PatientAnnonceController,
@@ -46,6 +47,12 @@ use App\Http\Middleware\CheckBlockedUser;
 use App\Http\Middleware\RoleMiddleware;
 
 // ==========================
+// Analyse IA image (upload)
+Route::post('/ia/gemini-image', [App\Http\Controllers\GeminiController::class, 'analyzeImage'])->middleware('auth');
+
+// Historique des analyses d'images (patient)
+Route::get('/patient/analyses', [App\Http\Controllers\Patient\ImageAnalysisController::class, 'index'])->middleware(['auth']);
+
 // ROUTES PUBLIQUES
 // ==========================
 
@@ -108,6 +115,26 @@ Route::post('/newsletter/subscribe', [App\Http\Controllers\NewsletterController:
 Route::post('/ia/gemini', [App\Http\Controllers\GeminiController::class, 'ask'])->name('ia.gemini');
 
 // ==========================
+// ROUTES PATIENT : Ordonnances et Examens
+// ==========================
+use App\Http\Controllers\PrescriptionController;
+use App\Http\Controllers\ExamResultController;
+
+Route::middleware(['auth', 'verified', App\Http\Middleware\RoleMiddleware::class . ':patient'])->prefix('patient')->name('patient.')->group(function () {
+    // Pharmacies à proximité
+    Route::get('/pharmacies', [\App\Http\Controllers\Patient\PharmacyController::class, 'index'])->name('pharmacies.index');
+    // Ordonnances
+    Route::get('/ordonnances', [PrescriptionController::class, 'index'])->name('ordonnances');
+    Route::get('/ordonnances/{id}', [PrescriptionController::class, 'show'])->name('ordonnances.show');
+    Route::get('/ordonnances/{id}/download', [PrescriptionController::class, 'download'])->name('ordonnances.download');
+
+    // Examens
+    Route::get('/examens', [ExamResultController::class, 'index'])->name('examens');
+    Route::get('/examens/{id}', [ExamResultController::class, 'show'])->name('examens.show');
+    Route::get('/examens/{id}/download', [ExamResultController::class, 'download'])->name('examens.download');
+});
+
+// ==========================
 // ROUTES ADMIN
 // ==========================
 
@@ -119,10 +146,27 @@ Route::prefix('admin')->name('admin.')->group(function () {
 });
 
 // Routes admin protégées (avec middleware check.blocked)
-Route::prefix('admin')->name('admin.')->middleware(['auth', 'verified', \App\Http\Middleware\CheckBlockedUser::class])->group(function () {
+// Routes API pour le chargement asynchrone des données
+Route::prefix('api/admin')->name('admin.api.')->middleware(['auth', 'verified', \App\Http\Middleware\CheckBlockedUser::class])->group(function () {
+    // Récupération des statistiques du dashboard
+    Route::get('/dashboard/stats', [\App\Http\Controllers\Admin\DashboardController::class, 'getStats'])->name('dashboard.stats');
     
+    // Récupération des notifications récentes
+    Route::get('/dashboard/notifications', [\App\Http\Controllers\Admin\DashboardController::class, 'getNotifications'])->name('dashboard.notifications');
+    
+    // Récupération de la liste des patients
+    Route::get('/dashboard/patients', [\App\Http\Controllers\Admin\DashboardController::class, 'getPatients'])->name('dashboard.patients');
+});
+
+Route::prefix('admin')->name('admin.')->middleware(['auth', 'verified', \App\Http\Middleware\CheckBlockedUser::class])->group(function () {
     // Dashboard
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
+    
+    // Gestion du profil administrateur
+    Route::prefix('profile')->name('profile.')->group(function () {
+        Route::get('/', [AdminProfileController::class, 'edit'])->name('edit');
+        Route::put('/', [AdminProfileController::class, 'update'])->name('update');
+    });
 
     // Gestion des utilisateurs
     Route::get('/users/patients', [UtilisateurController::class, 'index'])->name('users.patients');
@@ -181,6 +225,22 @@ Route::middleware(['auth', 'verified', \App\Http\Middleware\CheckBlockedUser::cl
     Route::get('/dashboard', [MedecinDashboardController::class, 'index'])->name('dashboard');
 
     // Gérer le profil
+    Route::get('/profile', [ProfileController::class, 'show'])->name('profile.show');
+    
+    // Gestion des nouvelles annonces
+    Route::prefix('new-annonces')->name('new-annonces.')->group(function() {
+        Route::get('/', [\App\Http\Controllers\Medecin\NewAnnonceController::class, 'index'])->name('index');
+        Route::get('/create', [\App\Http\Controllers\Medecin\NewAnnonceController::class, 'create'])->name('create');
+        Route::post('/', [\App\Http\Controllers\Medecin\NewAnnonceController::class, 'store'])->name('store');
+        Route::get('/{newAnnonce}', [\App\Http\Controllers\Medecin\NewAnnonceController::class, 'show'])->name('show');
+        Route::get('/{newAnnonce}/edit', [\App\Http\Controllers\Medecin\NewAnnonceController::class, 'edit'])->name('edit');
+        Route::put('/{newAnnonce}', [\App\Http\Controllers\Medecin\NewAnnonceController::class, 'update'])->name('update');
+        Route::delete('/{newAnnonce}', [\App\Http\Controllers\Medecin\NewAnnonceController::class, 'destroy'])->name('destroy');
+        
+        // Upload d'image pour l'éditeur
+        Route::post('/upload-image', [\App\Http\Controllers\Medecin\NewAnnonceController::class, 'uploadImage'])
+            ->name('upload.image');
+    });
     Route::get('/profile/edit', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::put('/profile/update', [ProfileController::class, 'update'])->name('profile.update');
 
@@ -208,6 +268,16 @@ Route::middleware(['auth', 'verified', \App\Http\Middleware\CheckBlockedUser::cl
 
     // Validation/refus rendez-vous
     Route::post('/rendez-vous/{id}/valider', [\App\Http\Controllers\Medecin\AnnonceController::class, 'validateRdv'])->name('appointments.validate');
+
+    // Reprogrammation de rendez-vous
+    Route::post('/appointments/reschedule', [\App\Http\Controllers\Medecin\AnnonceController::class, 'rescheduleRdv'])->name('appointments.reschedule');
+
+    // Messagerie médecin -> patient
+    Route::post('/messages/send', [\App\Http\Controllers\Medecin\MessageController::class, 'sendToPatient'])->name('messages.send');
+    // Création d'une ordonnance à partir d'un rendez-vous (pré-remplissage du patient)
+Route::get('prescriptions/create', [App\Http\Controllers\Medecin\OrdonnanceController::class, 'create'])->name('prescriptions.create');
+Route::resource('ordonnances', App\Http\Controllers\Medecin\OrdonnanceController::class)->names('ordonnances');
+    Route::resource('examens', App\Http\Controllers\Medecin\ExamenController::class)->names('examens');
     Route::post('/rendez-vous/{id}/refuser', [\App\Http\Controllers\Medecin\AnnonceController::class, 'refuseRdv'])->name('appointments.refuse');
 });
 
@@ -228,6 +298,8 @@ Route::middleware(['auth', 'verified', \App\Http\Middleware\RoleMiddleware::clas
 
     // Abonnements
     Route::resource('abonnements', PatientAbonnementController::class)->names('abonnements');
+    Route::get('abonnements/verify', [PatientAbonnementController::class, 'verify'])->name('abonnements.verify');
+    Route::post('abonnements/verify', [PatientAbonnementController::class, 'verifyPayment'])->name('abonnements.verifyPayment');
 
     // Annonces
     Route::resource('annonces', PatientAnnonceController::class)->names('annonces');

@@ -14,18 +14,36 @@ class MessageController extends Controller
         return view('medecin.messages.index', compact('messages'));
     }
 
-    public function store(Request $request)
+    /**
+     * Envoi d'un message privé médecin → patient (avec pièce jointe possible)
+     */
+    public function sendToPatient(Request $request)
     {
         $request->validate([
-            'contenu' => 'required|string',
+            'receiver_id' => 'required|exists:users,id',
+            'content' => 'required_without:attachment|string|nullable',
+            'attachment' => 'nullable|file|max:5120', // max 5Mo
         ]);
 
-        Message::create([
+        $attachmentPath = null;
+        if ($request->hasFile('attachment')) {
+            $attachmentPath = $request->file('attachment')->store('messages', 'public');
+        }
+
+        $message = \App\Models\Message::create([
             'user_id' => auth()->id(),
-            'contenu' => $request->contenu,
-            'public' => true,
+            'sender_id' => auth()->id(),
+            'receiver_id' => $request->receiver_id,
+            'content' => $request->content,
+            'attachment' => $attachmentPath,
         ]);
 
-        return back()->with('success', 'Message envoyé à la communauté.');
+        // Notifier le patient (notification personnalisée à créer si besoin)
+        $receiver = \App\Models\User::find($request->receiver_id);
+        if ($receiver) {
+            // $receiver->notify(new ...); // Notification à implémenter
+        }
+
+        return back()->with('success', 'Message envoyé au patient.');
     }
 }

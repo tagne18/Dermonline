@@ -60,5 +60,6 @@
             <x-chat.ia />
             @endif
         @endauth
-    </body>
+        @stack('scripts')
+        </body>
 </html>

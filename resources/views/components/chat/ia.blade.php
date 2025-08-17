@@ -27,9 +27,13 @@
         <div class="text-muted text-center">Posez-moi une question...</div>
     </div>
 
+    <!-- Suggestions de questions -->
+    <div class="px-2 pb-2">
+        <div id="iaSuggestions" class="d-flex flex-wrap gap-2"></div>
+    </div>
     <div class="card-footer p-2">
         <form id="iaForm" class="d-flex gap-2">
-            <input type="text" id="iaInput" class="form-control form-control-sm border-0" placeholder="Message pour l'IA..." required>
+            <input type="text" id="iaInput" class="form-control form-control-sm border-0" placeholder="Message pour l'IA..." required autocomplete="off">
             <button class="btn btn-success btn-sm" type="submit">➡️</button>
         </form>
     </div>
@@ -37,75 +41,129 @@
 
 @push('scripts')
 <script>
-    const iaBtn = document.getElementById('iaBtn');
-    const iaBox = document.getElementById('iaChatBox');
-    const iaForm = document.getElementById('iaForm');
-    const iaInput = document.getElementById('iaInput');
-    const iaMessages = document.getElementById('iaMessages');
+const iaBtn = document.getElementById('iaBtn');
+const iaBox = document.getElementById('iaChatBox');
+const iaForm = document.getElementById('iaForm');
+const iaInput = document.getElementById('iaInput');
+const iaMessages = document.getElementById('iaMessages');
+const iaSuggestions = document.getElementById('iaSuggestions');
 
-    iaBtn.addEventListener('click', () => {
-        iaBox.style.display = (iaBox.style.display === 'none' || iaBox.style.display === '') ? 'flex' : 'none';
+// Suggestions courantes
+const suggestions = [
+    "Quels sont les symptômes de l'eczéma ?",
+    "Comment prévenir l'acné ?",
+    "Quels sont les risques des MST ?",
+    "Comment prendre soin de ma peau ?",
+    "Que faire en cas de démangeaisons ?"
+];
+
+// Affichage suggestions sous forme de boutons
+function renderSuggestions() {
+    iaSuggestions.innerHTML = '';
+    suggestions.forEach(q => {
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'btn btn-outline-secondary btn-sm';
+        btn.textContent = q;
+        btn.onclick = () => {
+            iaInput.value = q;
+            iaInput.focus();
+        };
+        iaSuggestions.appendChild(btn);
     });
+}
+renderSuggestions();
 
-    iaForm.addEventListener('submit', async (e) => {
-        e.preventDefault();
-        const question = iaInput.value.trim();
-        if (!question) return;
+// Historique du chat (sessionStorage)
+function saveHistory() {
+    sessionStorage.setItem('iaChatHistory', iaMessages.innerHTML);
+}
+function loadHistory() {
+    const hist = sessionStorage.getItem('iaChatHistory');
+    if(hist) iaMessages.innerHTML = hist;
+}
+loadHistory();
 
-        appendIAMessage('Vous', question);
-        iaInput.value = '';
+iaBtn.addEventListener('click', () => {
+    iaBox.style.display = (iaBox.style.display === 'none' || iaBox.style.display === '') ? 'flex' : 'none';
+});
 
-        const thinking = appendIAMessage('IA', '<i>Réflexion en cours...</i>');
+iaForm.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const question = iaInput.value.trim();
+    if (!question) return;
 
-        try {
-            const response = await fetch("/api/ia/gemini", {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                },
-                body: JSON.stringify({ message: question })
-            });
+    appendIAMessage('Vous', question);
+    iaInput.value = '';
+    saveHistory();
 
-            const data = await response.json();
-            iaMessages.removeChild(thinking);
+    const thinking = appendIAMessage('IA', '<span class="spinner-border spinner-border-sm text-warning me-2"></span> <i>DE-IA réfléchit...</i>');
 
-            if (data.success) {
-                const iaReply = data.response ?? '❌ Erreur de réponse IA.';
-                appendIAMessage('IA', iaReply);
-            } else {
-                appendIAMessage('IA', '❌ Erreur: ' + (data.response || 'Erreur inconnue'));
-            }
-        } catch (error) {
-            iaMessages.removeChild(thinking);
-            appendIAMessage('IA', '❌ Erreur de communication avec l'IA.');
-            console.error(error);
-        }
-    });
-
-    function appendIAMessage(sender, message) {
-        const div = document.createElement('div');
-        div.className = 'mb-2';
-
-        if (sender === 'Vous') {
-            div.classList.add('text-end');
-            div.innerHTML = `
-                <div class="d-inline-block bg-primary text-white p-2 rounded shadow-sm">
-                    ${message}
-                </div>
-            `;
+    try {
+        const response = await fetch("/api/ia/gemini", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ message: question })
+        });
+        const data = await response.json();
+        iaMessages.removeChild(thinking);
+        if (data.success) {
+            const iaReply = formatIAResponse(data.response ?? '❌ Erreur de réponse IA.');
+            appendIAMessage('IA', iaReply);
         } else {
-            div.classList.add('text-start');
-            div.innerHTML = `
-                <div class="d-inline-block bg-light text-dark p-2 rounded shadow-sm">
-                    ${message}
-                </div>
-            `;
+            appendIAMessage('IA', '❌ Erreur: ' + (data.response || 'Erreur inconnue'));
         }
-
-        iaMessages.appendChild(div);
-        iaMessages.scrollTop = iaMessages.scrollHeight;
-        return div;
+        saveHistory();
+    } catch (error) {
+        iaMessages.removeChild(thinking);
+        appendIAMessage('IA', '❌ Erreur de communication avec l\'IA.');
+        saveHistory();
+        console.error(error);
     }
+});
+
+function appendIAMessage(sender, message) {
+    const div = document.createElement('div');
+    div.className = 'mb-2';
+    if (sender === 'Vous') {
+        div.classList.add('text-end');
+        div.innerHTML = `
+            <div class="d-inline-block bg-primary text-white p-2 rounded shadow-sm">
+                ${escapeHtml(message)}
+            </div>
+        `;
+    } else {
+        div.classList.add('text-start');
+        div.innerHTML = `
+            <div class="d-inline-block bg-light text-dark p-2 rounded shadow-sm ia-response">
+                ${message}
+            </div>
+        `;
+    }
+    iaMessages.appendChild(div);
+    iaMessages.scrollTop = iaMessages.scrollHeight;
+    return div;
+}
+
+// Formatage simple (paragraphes, listes, emojis)
+function formatIAResponse(text) {
+    if (!text) return '';
+    // Paragraphes
+    let html = text.replace(/\n\n/g, '</p><p>').replace(/\n/g, '<br>');
+    // Puces
+    html = html.replace(/\u2022/g, '<br>•');
+    // Mise en gras avertissement
+    html = html.replace(/(⚠️ IMPORTANT[\s\S]*)/, '<strong class="text-danger">$1</strong>');
+    return '<p>' + html + '</p>';
+}
+// Sécurité XSS
+function escapeHtml(str) {
+    return str.replace(/[&<>"]/g, function(c) {
+        return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];
+    });
+}
 </script>
 @endpush
 
@@ -143,21 +201,28 @@
         </div>
         
         <!-- Messages -->
-        <div id="deiaMessages" class="card-body overflow-auto" style="height: 300px;">
+        <div id="deiaMessages" class="card-body overflow-auto" style="height: 220px;">
             <div class="alert alert-info">
                 <strong>DE-IA :</strong> Bonjour ! Je suis DE-IA, votre assistant spécialisé en dermatologie. 
                 Posez-moi vos questions sur les problèmes de peau, mais n'oubliez pas que je suis là pour vous aider, 
                 pas pour remplacer un diagnostic médical.
             </div>
         </div>
-        
+        <!-- Suggestions de questions -->
+        <div class="px-2 pb-2">
+            <div id="deiaSuggestions" class="d-flex flex-wrap gap-2"></div>
+        </div>
         <!-- Input -->
         <div class="card-footer">
             <form id="deiaForm" class="d-flex gap-2">
-                <input type="text" id="deiaInput" class="form-control" placeholder="Décrivez votre problème de peau..." required>
+                <input type="text" id="deiaInput" class="form-control" placeholder="Décrivez votre problème de peau..." required autocomplete="off">
                 <button type="submit" class="btn btn-success">
                     <i class="fas fa-paper-plane"></i>
                 </button>
+                <button type="button" id="deiaUploadBtn" class="btn btn-secondary" title="Envoyer une photo" style="padding:0 12px;">
+                    📷
+                </button>
+                <input type="file" id="deiaFileInput" accept="image/*" style="display:none;">
             </form>
         </div>
     </div>
@@ -172,6 +237,42 @@
         }
     }
 
+    // Suggestions courantes DE-IA
+   const deiaSuggestions = [
+        "Quels sont les symptômes de l'eczéma ?",
+        "Comment prévenir l'acné ?",
+        "Quels sont les risques des MST ?",
+        "Comment prendre soin de ma peau ?",
+        "Que faire en cas de démangeaisons ?"
+    ];
+    
+    function renderDeiaSuggestions() {
+        const sug = document.getElementById('deiaSuggestions');
+        sug.innerHTML = '';
+        deiaSuggestions.forEach(q => {
+            const btn = document.createElement('button');
+            btn.type = 'button';
+            btn.className = 'btn btn-outline-secondary btn-sm';
+            btn.textContent = q;
+            btn.onclick = () => {
+                document.getElementById('deiaInput').value = q;
+                document.getElementById('deiaInput').focus();
+            };
+            sug.appendChild(btn);
+        });
+    }
+    renderDeiaSuggestions();
+
+    // Historique du chat (sessionStorage)
+    function saveDeiaHistory() {
+        sessionStorage.setItem('deiaChatHistory', document.getElementById('deiaMessages').innerHTML);
+    }
+    function loadDeiaHistory() {
+        const hist = sessionStorage.getItem('deiaChatHistory');
+        if(hist) document.getElementById('deiaMessages').innerHTML = hist;
+    }
+    loadDeiaHistory();
+
     // Gestion du formulaire DE-IA
     document.getElementById('deiaForm').addEventListener('submit', function(e) {
         e.preventDefault();
@@ -180,13 +281,15 @@
         const message = input.value.trim();
         
         if (!message) return;
-        
+        // Masquer suggestions
+        document.getElementById('deiaSuggestions').style.display = 'none';
         // Afficher le message utilisateur
-        addMessage('user', message);
+        addDeiaMessage('user', message);
         input.value = '';
+        saveDeiaHistory();
         
         // Afficher l'indicateur de chargement
-        addLoadingMessage();
+        addDeiaLoadingMessage();
         
         // Envoyer à l'API
         fetch('/ia/gemini', {
@@ -200,27 +303,64 @@
         .then(response => response.json())
         .then(data => {
             // Supprimer le message de chargement
-            removeLoadingMessage();
+            removeDeiaLoadingMessage();
             
             if (data.success) {
-                addMessage('ai', data.response);
+                addDeiaMessage('ai', formatDeiaResponse(data.response));
             } else {
-                addMessage('ai', 'Désolé, je rencontre des difficultés. Veuillez consulter un dermatologue.');
+                addDeiaMessage('ai', 'Désolé, je rencontre des difficultés. Veuillez consulter un dermatologue.');
             }
+            saveDeiaHistory();
         })
         .catch(error => {
-            removeLoadingMessage();
-            addMessage('ai', 'Erreur de connexion. Veuillez consulter un dermatologue.');
+            removeDeiaLoadingMessage();
+            addDeiaMessage('ai', 'Erreur de connexion. Veuillez consulter un dermatologue.');
+            saveDeiaHistory();
         });
     });
 
-    function addMessage(type, content) {
+    // Gestion du bouton upload image
+    document.getElementById('deiaUploadBtn').addEventListener('click', function() {
+        document.getElementById('deiaFileInput').click();
+    });
+    document.getElementById('deiaFileInput').addEventListener('change', function(e) {
+        const file = e.target.files[0];
+        if (!file) return;
+        // Masquer suggestions
+        document.getElementById('deiaSuggestions').style.display = 'none';
+        addDeiaMessage('user', 'Image envoyée. Analyse en cours...');
+        addDeiaLoadingMessage();
+        const formData = new FormData();
+        formData.append('image', file);
+        formData.append('_token', document.querySelector('meta[name="csrf-token"]').getAttribute('content'));
+        fetch('/ia/gemini-image', {
+            method: 'POST',
+            body: formData
+        })
+        .then(res => res.json())
+        .then(data => {
+            removeDeiaLoadingMessage();
+            if (data.success) {
+                addDeiaMessage('ai', formatDeiaResponse(data.response));
+            } else {
+                addDeiaMessage('ai', 'Erreur lors de l\'analyse de l\'image.');
+            }
+            saveDeiaHistory();
+        })
+        .catch(() => {
+            removeDeiaLoadingMessage();
+            addDeiaMessage('ai', 'Erreur technique lors de l\'analyse de l\'image.');
+            saveDeiaHistory();
+        });
+    });
+
+    function addDeiaMessage(type, content) {
         const messagesContainer = document.getElementById('deiaMessages');
         const messageDiv = document.createElement('div');
         
         if (type === 'user') {
             messageDiv.className = 'alert alert-primary text-end';
-            messageDiv.innerHTML = `<strong>Vous :</strong> ${content}`;
+            messageDiv.innerHTML = `<strong>Vous :</strong> ${escapeHtml(content)}`;
         } else {
             messageDiv.className = 'alert alert-light';
             messageDiv.innerHTML = `<strong>DE-IA :</strong> ${content}`;
@@ -230,22 +370,37 @@
         messagesContainer.scrollTop = messagesContainer.scrollHeight;
     }
 
-    function addLoadingMessage() {
+    function addDeiaLoadingMessage() {
         const messagesContainer = document.getElementById('deiaMessages');
         const loadingDiv = document.createElement('div');
-        loadingDiv.id = 'loadingMessage';
+        loadingDiv.id = 'deiaLoadingMessage';
         loadingDiv.className = 'alert alert-light';
-        loadingDiv.innerHTML = '<strong>DE-IA :</strong> <i class="fas fa-spinner fa-spin"></i> Je réfléchis...';
+        loadingDiv.innerHTML = '<strong>DE-IA :</strong> <span class="spinner-border spinner-border-sm text-primary me-2"></span> Je réfléchis...';
         
         messagesContainer.appendChild(loadingDiv);
         messagesContainer.scrollTop = messagesContainer.scrollHeight;
     }
 
-    function removeLoadingMessage() {
-        const loadingMessage = document.getElementById('loadingMessage');
+    function removeDeiaLoadingMessage() {
+        const loadingMessage = document.getElementById('deiaLoadingMessage');
         if (loadingMessage) {
             loadingMessage.remove();
         }
+    }
+
+    // Formatage IA (paragraphes, listes, avertissement)
+    function formatDeiaResponse(text) {
+        if (!text) return '';
+        let html = text.replace(/\n\n/g, '</p><p>').replace(/\n/g, '<br>');
+        html = html.replace(/\u2022/g, '<br>•');
+        html = html.replace(/(⚠️ IMPORTANT[\s\S]*)/, '<strong class="text-danger">$1</strong>');
+        return '<p>' + html + '</p>';
+    }
+    // Sécurité XSS
+    function escapeHtml(str) {
+        return str.replace(/[&<>"]/g, function(c) {
+            return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];
+        });
     }
     </script>
     @endif

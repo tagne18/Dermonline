@@ -7,6 +7,7 @@
     <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-icons/1.10.0/font/bootstrap-icons.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@9/swiper-bundle.min.css" />
     
     <style>
         :root {
@@ -830,7 +831,7 @@
                     </div>
                 </div>
                 
-                <div class="col-lg-6 text-center animate-fade-in-right">
+                <div class="col-lg-6 text-center animate-fade-in-right ">
                     <div class="position-relative">
                     <div class="animate-float">
                             <img src="https://images.pexels.com/photos/1181696/pexels-photo-1181696.jpeg?auto=compress&w=500&h=600&fit=crop" 
@@ -965,20 +966,106 @@
             </div>
             <div class="row g-4">
                 @foreach($medecins as $medecin)
-                    <div class="col-lg-3 col-md-6 scroll-animate">
-                        <div class="team-card">
-                            <img src="{{ $medecin->profile_photo_url }}" alt="{{ $medecin->name }}" style="width:300px;height:300px;object-fit:cover;">
-                            <div class="p-4 text-center">
-                                <h5>{{ $medecin->name }}</h5>
-                                <p class="text-muted mb-2">{{ $medecin->specialite ?? 'Dermatologue' }}</p>
-                                <p class="small text-secondary mb-3">{{ $medecin->a_propos ? Str::limit($medecin->a_propos, 80) : '' }}</p>
-                                <div class="d-flex justify-content-center gap-2">
-                                    {{-- Réseaux sociaux à ajouter si besoin --}}
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                @endforeach
+    <div class="col-lg-3 col-md-6 scroll-animate">
+        <div class="team-card">
+    <img src="{{ $medecin->profile_photo_url }}" alt="{{ $medecin->name }}" style="width:300px;height:300px;object-fit:cover;">
+    <div class="p-4 text-center">
+        <h5>{{ $medecin->name }}</h5>
+        <p class="text-muted mb-2">{{ $medecin->specialite ?? 'Dermatologue' }}</p>
+        <!--<p class="small text-secondary mb-3">{{ $medecin->a_propos ? Str::limit($medecin->a_propos, 80) : '' }}</p>-->
+        <div class="d-flex justify-content-center gap-2 mb-2">
+            {{-- Réseaux sociaux à ajouter si besoin --}}
+        </div>
+        <button type="button" class="btn btn-outline-primary btn-sm voir-profile-btn" data-medecin="{{ htmlentities(json_encode([
+            "name" => $medecin->name,
+            "specialite" => $medecin->specialite,
+            "profile_photo_url" => $medecin->profile_photo_url,
+            "lieu_travail" => $medecin->lieu_travail,
+            "a_propos" => $medecin->a_propos,
+            "facebook" => $medecin->facebook,
+            "linkedin" => $medecin->linkedin,
+            "x" => $medecin->x
+        ]), ENT_QUOTES, 'UTF-8') }}">
+            Voir le profil
+        </button>
+    </div>
+</div>
+    </div>
+@endforeach
+
+<!-- Modal Médecin -->
+<div class="modal fade" id="doctorModal" tabindex="-1" aria-labelledby="doctorModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="doctorModalLabel">Profil du Médecin</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fermer"></button>
+      </div>
+      <div class="modal-body text-center">
+        <img id="doctorModalPhoto" src="" alt="Photo" class="rounded-circle mb-3" style="width:120px;height:120px;object-fit:cover;">
+        <h5 id="doctorModalNom"></h5>
+        <p class="mb-1"><strong>Spécialité :</strong> <span id="doctorModalSpecialite"></span></p>
+        <p class="mb-1"><strong>Lieu de travail :</strong> <span id="doctorModalLieu"></span></p>
+        <p class="mb-2"><strong>À propos :</strong></p>
+        <p id="doctorModalApropos" class="text-muted"></p>
+        <hr>
+        <div class="mb-2">
+          <strong>Réseaux sociaux :</strong>
+          <div class="d-flex justify-content-center gap-3 mt-2">
+            <a href="#" target="_blank" id="doctorModalFacebook" class="text-decoration-none" style="font-size:1.5rem;display:none;"><i class="bi bi-facebook"></i></a>
+            <a href="#" target="_blank" id="doctorModalLinkedin" class="text-decoration-none" style="font-size:1.5rem;display:none;"><i class="bi bi-linkedin"></i></a>
+            <a href="#" target="_blank" id="doctorModalX" class="text-decoration-none" style="font-size:1.5rem;display:none;"><i class="bi bi-twitter-x"></i></a>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fermer</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    document.querySelectorAll('.voir-profile-btn').forEach(function(btn) {
+        btn.addEventListener('click', function() {
+            const data = JSON.parse(this.getAttribute('data-medecin'));
+            document.getElementById('doctorModalPhoto').src = data.profile_photo_url || '';
+            document.getElementById('doctorModalNom').textContent = data.name || '';
+            document.getElementById('doctorModalSpecialite').textContent = data.specialite || '';
+            document.getElementById('doctorModalLieu').textContent = data.lieu_travail || '';
+            document.getElementById('doctorModalApropos').textContent = data.a_propos || '';
+            // Réseaux sociaux
+            const fb = document.getElementById('doctorModalFacebook');
+            const li = document.getElementById('doctorModalLinkedin');
+            const xx = document.getElementById('doctorModalX');
+            if (data.facebook) {
+                fb.href = data.facebook;
+                fb.style.display = '';
+            } else {
+                fb.href = '#';
+                fb.style.display = 'none';
+            }
+            if (data.linkedin) {
+                li.href = data.linkedin;
+                li.style.display = '';
+            } else {
+                li.href = '#';
+                li.style.display = 'none';
+            }
+            if (data.x) {
+                xx.href = data.x;
+                xx.style.display = '';
+            } else {
+                xx.href = '#';
+                xx.style.display = 'none';
+            }
+            var modal = new bootstrap.Modal(document.getElementById('doctorModal'));
+            modal.show();
+        });
+    });
+});
+</script>
             </div>
         </div>
     </section>
@@ -990,55 +1077,27 @@
                 <h2>Témoignages</h2>
                 <p class="lead text-muted">Ce que nos patients disent de nous</p>
             </div>
-            
-            <div class="row g-4">
-                <div class="col-lg-4 col-md-6 scroll-animate">
-                    <div class="testimonial-card">
-                        <img src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=80&h=80&fit=crop&crop=face" alt="Patient 1">
-                        <div class="stars">
-                            <i class="bi bi-star-fill"></i>
-                            <i class="bi bi-star-fill"></i>
-                            <i class="bi bi-star-fill"></i>
-                            <i class="bi bi-star-fill"></i>
-                            <i class="bi bi-star-fill"></i>
+            <div class="swiper-container">
+                <div class="swiper-wrapper">
+                    @foreach($testimonials as $testimonial)
+                        <div class="swiper-slide">
+                            <div class="testimonial-card">
+                                <img src="{{ $testimonial->user->photo ?? 'https://ui-avatars.com/api/?name='.urlencode($testimonial->name) }}" alt="{{ $testimonial->name }}">
+                                <div class="stars">
+                                    @for($i = 0; $i < 5; $i++)
+                                        <i class="bi bi-star{{ $i < ($testimonial->note ?? 5) ? '-fill' : '' }}"></i>
+                                    @endfor
+                                </div>
+                                <p>"{{ $testimonial->content }}"</p>
+                                <h5>{{ $testimonial->name }}</h5>
+                                <p class="text-muted">Patient{{ $testimonial->ville ? ', '.$testimonial->ville : '' }}</p>
+                            </div>
                         </div>
-                        <p>"Une expérience incroyable ! Le dermatologue était à l'écoute et m'a donné un diagnostic précis en 24h."</p>
-                        <h5>Marie Dubois</h5>
-                        <p class="text-muted">Patient, Paris</p>
-                    </div>
+                    @endforeach
                 </div>
-                
-                <div class="col-lg-4 col-md-6 scroll-animate">
-                    <div class="testimonial-card">
-                        <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=80&h=80&fit=crop&crop=face" alt="Patient 2">
-                        <div class="stars">
-                            <i class="bi bi-star-fill"></i>
-                            <i class="bi bi-star-fill"></i>
-                            <i class="bi bi-star-fill"></i>
-                            <i class="bi bi-star-fill"></i>
-                            <i class="bi bi-star-half"></i>
-                        </div>
-                        <p>"Le suivi personnalisé m'a beaucoup aidé à gérer mon problème de peau. Je recommande vivement !"</p>
-                        <h5>Jean Martin</h5>
-                        <p class="text-muted">Patient, Lyon</p>
-                    </div>
-                </div>
-                
-                <div class="col-lg-4 col-md-6 scroll-animate">
-                    <div class="testimonial-card">
-                        <img src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=80&h=80&fit=crop&crop=face" alt="Patient 3">
-                        <div class="stars">
-                            <i class="bi bi-star-fill"></i>
-                            <i class="bi bi-star-fill"></i>
-                            <i class="bi bi-star-fill"></i>
-                            <i class="bi bi-star-fill"></i>
-                            <i class="bi bi-star-fill"></i>
-                        </div>
-                        <p>"Service rapide et professionnel. J'ai pu obtenir une ordonnance sans quitter mon domicile."</p>
-                        <h5>Sophie Laurent</h5>
-                        <p class="text-muted">Patient, Marseille</p>
-                    </div>
-                </div>
+                <div class="swiper-pagination"></div>
+                <div class="swiper-button-prev"></div>
+                <div class="swiper-button-next"></div>
             </div>
         </div>
     </section>
@@ -1239,7 +1298,7 @@
                     <h4>Contact</h4>
                     <ul class="list-unstyled">
                         <li><a href="mailto:contact@dermonline.com">contact@dermonline.com</a></li>
-                        <li><a href="tel:+33123456789">+33 1 23 45 67 89</a></li>
+                        <li><a href="tel:+237 681531181">+237 681531181</a></li>
                         <li>123 Rue de la Santé, 75001 Paris, France</li>
                     </ul>
                 </div>
@@ -1266,13 +1325,14 @@
             <hr class="my-4 bg-light opacity-25">
             
             <div class="text-center">
-                <p class="mb-0">© 2025 Dermonline. Tous droits réservés.</p>
+                <p class="mb-0"> 2025 Dermonline. Tous droits réservés.</p>
             </div>
         </div>
     </footer>
 
     <!-- Scripts -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/swiper@9/swiper-bundle.min.js"></script>
     <script>
         // Loading animation
         window.addEventListener('load', () => {
@@ -1351,6 +1411,22 @@
         }, { threshold: 0.5 });
 
         counterObserver.observe(document.querySelector('#counters'));
+
+        // SwiperJS initialization
+        document.addEventListener('DOMContentLoaded', function() {
+            new Swiper('.swiper-container', {
+                loop: true,
+                slidesPerView: 1,
+                spaceBetween: 30,
+                pagination: { el: '.swiper-pagination', clickable: true },
+                navigation: { nextEl: '.swiper-button-next', prevEl: '.swiper-button-prev' },
+                breakpoints: {
+                    768: { slidesPerView: 2 },
+                    992: { slidesPerView: 3 }
+                }
+            });
+        });
     </script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

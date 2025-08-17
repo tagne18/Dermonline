@@ -83,7 +83,9 @@
                                             </label>
                                             <input type="tel" name="patient_phone" id="patient_phone" required
                                                    class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors"
-                                                   placeholder="+237 XXX XXX XXX">
+                                                   placeholder="+237 XXX XXX XXX"
+                                                   value="{{ auth()->user()->phone ??  ''  }}">
+                                                   
                                         </div>
                                     </div>
                                 </div>
@@ -359,18 +361,101 @@
     </div>
 
     @if(session('success'))
-        <div id="successModal" class="fixed inset-0 flex items-center justify-center z-50 bg-black bg-opacity-40">
-            <div class="bg-white rounded-lg shadow-lg p-8 max-w-md w-full text-center">
-                <h3 class="text-2xl font-bold mb-4 text-green-600">Rendez-vous confirmé !</h3>
-                <p class="mb-6">{{ session('success') }}</p>
-                <button onclick="document.getElementById('successModal').style.display='none'" class="px-6 py-2 bg-green-600 text-white rounded hover:bg-green-700">Fermer</button>
+        <div id="successModal" class="fixed inset-0 z-50 flex items-center justify-center transition-all duration-300 bg-black/50 backdrop-blur-sm opacity-0 pointer-events-none" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+            <div class="relative w-full max-w-md px-6 py-8 mx-4 transition-all duration-300 transform -translate-y-10 bg-white rounded-xl shadow-2xl sm:mx-6 md:mx-0">
+                <!-- Close button -->
+                <button onclick="closeModal()" class="absolute top-4 right-4 p-1 rounded-full hover:bg-gray-100 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-indigo-500" aria-label="Fermer">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                </button>
+                
+                <!-- Success icon -->
+                <div class="flex justify-center mb-6">
+                    <div class="flex items-center justify-center w-20 h-20 rounded-full bg-green-50">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="w-12 h-12 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                        </svg>
+                    </div>
+                </div>
+                
+                <!-- Content -->
+                <div class="text-center">
+                    <h3 id="modal-title" class="mb-3 text-2xl font-bold text-gray-900">Rendez-vous confirmé !</h3>
+                    <p class="mb-6 text-gray-600">{{ session('success') }}</p>
+                    
+                    <div class="mt-8">
+                        <button onclick="closeModal()" class="w-full px-6 py-3 text-sm font-medium text-white transition-colors duration-200 transform bg-indigo-600 rounded-lg hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                            Parfait, merci !
+                        </button>
+                        
+                        <p class="mt-3 text-xs text-gray-500">
+                            Un email de confirmation vous a été envoyé
+                        </p>
+                    </div>
+                </div>
             </div>
         </div>
+
         <script>
-            // Fermer le modal avec la touche Echap
-            document.addEventListener('keydown', function(e) {
-                if(e.key === 'Escape') {
-                    document.getElementById('successModal').style.display = 'none';
+            // Show modal with animation
+            document.addEventListener('DOMContentLoaded', function() {
+                const modal = document.getElementById('successModal');
+                setTimeout(() => {
+                    modal.classList.remove('opacity-0', 'pointer-events-none');
+                    modal.classList.add('opacity-100', 'pointer-events-auto');
+                    modal.querySelector('div').classList.remove('-translate-y-10');
+                    modal.querySelector('div').classList.add('translate-y-0');
+                }, 100);
+                
+                // Trap focus inside modal
+                const focusableElements = 'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])';
+                const focusableContent = modal.querySelectorAll(focusableElements);
+                const firstFocusableElement = focusableContent[0];
+                const lastFocusableElement = focusableContent[focusableContent.length - 1];
+                
+                firstFocusableElement.focus();
+                
+                modal.addEventListener('keydown', function(e) {
+                    let isTabPressed = e.key === 'Tab' || e.keyCode === 9;
+                    
+                    if (!isTabPressed) {
+                        if (e.key === 'Escape') {
+                            closeModal();
+                        }
+                        return;
+                    }
+                    
+                    if (e.shiftKey) {
+                        if (document.activeElement === firstFocusableElement) {
+                            lastFocusableElement.focus();
+                            e.preventDefault();
+                        }
+                    } else {
+                        if (document.activeElement === lastFocusableElement) {
+                            firstFocusableElement.focus();
+                            e.preventDefault();
+                        }
+                    }
+                });
+            });
+            
+            function closeModal() {
+                const modal = document.getElementById('successModal');
+                modal.classList.add('opacity-0', 'pointer-events-none');
+                modal.querySelector('div').classList.remove('translate-y-0');
+                modal.querySelector('div').classList.add('-translate-y-10');
+                
+                // Remove modal from DOM after animation
+                setTimeout(() => {
+                    modal.remove();
+                }, 300);
+            }
+            
+            // Close when clicking outside modal content
+            document.getElementById('successModal').addEventListener('click', function(e) {
+                if (e.target === this) {
+                    closeModal();
                 }
             });
         </script>
