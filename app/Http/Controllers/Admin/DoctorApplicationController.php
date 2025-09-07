@@ -175,14 +175,20 @@ class DoctorApplicationController extends Controller
         return view('admin.medecins.index', compact('medecins', 'stats', 'specialites'));
     }
 
-    public function bloquerMedecin($id)
+    public function bloquerMedecin(Request $request, $id)
     {
+        $request->validate([
+            'raison' => 'nullable|string|max:500'
+        ]);
+
         $medecin = User::where('role', 'medecin')->findOrFail($id);
         $medecin->is_blocked = true;
+        $medecin->block_reason = $request->input('raison');
+        $medecin->blocked_at = now();
         $medecin->blocked_at = now();
         $medecin->save();
 
-        return redirect()->back()->with('success', 'Médecin bloqué avec succès. Il ne pourra plus se connecter.');
+        return redirect()->back()->with('success', 'Vous venez de bloquer le compte de ce Médecin. Il ne pourra plus se connecter jusqu\'a nouvelles ordre.');
     }
 
     public function debloquerMedecin($id)
@@ -233,7 +239,7 @@ class DoctorApplicationController extends Controller
                 ->whereMonth('created_at', now()->month)
                 ->count(),
             'abonnes_ce_mois' => $medecin->abonnes()
-                ->whereMonth('created_at', now()->month)
+                ->whereMonth('abonnements.created_at', now()->month)
                 ->count(),
         ];
 
@@ -325,18 +331,55 @@ class DoctorApplicationController extends Controller
             ->orderBy('mois')
             ->get();
 
-        return view('admin.medecins.statistiques', compact('stats', 'topSpecialites', 'topVilles', 'evolution'));
+        // Couleurs pour les graphiques
+        $colors = [
+            '#4e73df', '#1cc88a', '#36b9cc', '#f6c23e', '#e74a3b',
+            '#5a5c69', '#858796', '#3a3b45', '#00bcd4', '#9c27b0'
+        ];
+
+        return view('admin.medecins.statistiques', compact('stats', 'topSpecialites', 'topVilles', 'evolution', 'colors'));
     }
 
     public function deleteRejected()
     {
-        $count = DoctorApplication::where('status', 'rejected')->count();
+        $deleted = DoctorApplication::where('status', 'rejected')->delete();
+        return redirect()->route('admin.doctor_applications.index')
+            ->with('success', "$deleted demandes rejetées supprimées avec succès.");
+    }
 
-        if ($count > 0) {
-            DoctorApplication::where('status', 'rejected')->delete();
-            return back()->with('success', "$count demande(s) rejetée(s) supprimée(s).");
+    /**
+     * Supprime un médecin de la base de données
+     *
+     * @param int $id
+     * @return \Illuminate\Http\Response
+     */
+    public function destroy($id)
+    {
+        try {
+            $user = User::findOrFail($id);
+            
+            // Vérifier si l'utilisateur est bien un médecin
+            if (!$user->hasRole('medecin')) {
+                return redirect()->route('admin.medecins.index')
+                    ->with('error', 'Seuls les comptes médecins peuvent être supprimés via cette méthode.');
+            }
+            
+            // Supprimer les relations et fichiers associés si nécessaire
+            // Par exemple :
+            // - Supprimer les rendez-vous
+            // - Supprimer les messages
+            // - Supprimer les fichiers uploadés, etc.
+            
+            // Supprimer l'utilisateur
+            $user->delete();
+            
+            return redirect()->route('admin.medecins.index')
+                ->with('success', 'Le médecin a été supprimé avec succès.');
+                
+        } catch (\Exception $e) {
+            Log::error('Erreur lors de la suppression du médecin : ' . $e->getMessage());
+            return redirect()->route('admin.medecins.index')
+                ->with('error', 'Une erreur est survenue lors de la suppression du médecin.');
         }
-
-        return back()->with('info', 'Aucune demande rejetée à supprimer.');
     }
 }

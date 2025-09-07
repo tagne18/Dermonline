@@ -74,8 +74,12 @@ class AnnonceController extends Controller
         $rdv = Appointment::findOrFail($id);
         $rdv->statut = 'valide';
         $rdv->save();
+        
         // Notifier le patient
-        $rdv->patient->notify(new AppointmentStatusNotification($rdv, 'validé'));
+        if ($rdv->user) {
+            $rdv->user->notify(new AppointmentStatusNotification($rdv, 'validé'));
+        }
+        
         return back()->with('success', 'Rendez-vous validé. Le patient a été notifié.');
     }
 
@@ -84,8 +88,12 @@ class AnnonceController extends Controller
         $rdv = Appointment::findOrFail($id);
         $rdv->statut = 'refuse';
         $rdv->save();
+        
         // Notifier le patient
-        $rdv->patient->notify(new AppointmentStatusNotification($rdv, 'refusé'));
+        if ($rdv->user) {
+            $rdv->user->notify(new AppointmentStatusNotification($rdv, 'refusé'));
+        }
+        
         return back()->with('success', 'Rendez-vous refusé. Le patient a été notifié.');
     }
 
@@ -99,15 +107,18 @@ class AnnonceController extends Controller
             'new_date' => 'required|date|after:today',
             'new_time' => 'required',
         ]);
+        
         $rdv = Appointment::findOrFail($request->appointment_id);
         $rdv->proposed_date = $request->new_date;
         $rdv->proposed_time = $request->new_time;
-        $rdv->statut = 'reprogramme'; // statut personnalisé
+        $rdv->statut = 'reprogramme';
         $rdv->save();
-        // Notifier le patient (notification personnalisée à créer si besoin)
-        if ($rdv->patient) {
-            $rdv->patient->notify(new AppointmentStatusNotification($rdv, 'proposé'));
+        
+        // Notifier le patient
+        if ($rdv->user) {
+            $rdv->user->notify(new AppointmentStatusNotification($rdv, 'reprogrammé'));
         }
+        
         return back()->with('success', 'Proposition de reprogrammation envoyée au patient. Il doit valider ou refuser.');
     }
 }

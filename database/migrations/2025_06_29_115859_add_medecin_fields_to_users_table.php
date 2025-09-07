@@ -12,10 +12,21 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('users', function (Blueprint $table) {
-            $table->string('specialite')->nullable()->after('profession');
-            $table->string('ville')->nullable()->after('specialite');
-            $table->string('lieu_travail')->nullable()->after('ville');
-            $table->enum('langue', ['fr', 'en'])->nullable()->after('lieu_travail');
+            if (!Schema::hasColumn('users', 'specialite')) {
+                $table->string('specialite')->nullable()->after('profession');
+            }
+            if (!Schema::hasColumn('users', 'ville')) {
+                $table->string('ville')->nullable()->after('specialite');
+            }
+            if (!Schema::hasColumn('users', 'lieu_travail')) {
+                $table->string('lieu_travail')->nullable()->after('ville');
+            }
+            if (!Schema::hasColumn('users', 'langue')) {
+                $table->enum('langue', ['fr', 'en'])->default('fr')->after('lieu_travail');
+            } else {
+                // Mettre à jour le type de la colonne si elle existe déjà
+                $table->enum('langue', ['fr', 'en'])->default('fr')->change();
+            }
         });
     }
 

@@ -99,6 +99,41 @@ class User extends Authenticatable implements MustVerifyEmail
     ];
 
     /**
+     * The attributes that should be cast.
+     *
+     * @var array<string, string>
+     */
+    protected $casts = [
+        'email_verified_at' => 'datetime',
+        'password' => 'hashed',
+        'langue' => 'string',
+    ];
+
+    /**
+     * Set the langue attribute.
+     *
+     * @param  string  $value
+     * @return void
+     */
+    public function setLangueAttribute($value)
+    {
+        // S'assurer que la valeur est dans la liste des valeurs autorisées
+        $this->attributes['langue'] = in_array($value, ['fr', 'en', 'both']) ? $value : 'fr';
+    }
+
+    /**
+     * Get the langue attribute.
+     *
+     * @param  mixed  $value
+     * @return string
+     */
+    public function getLangueAttribute($value)
+    {
+        // S'assurer que la valeur est dans la liste des valeurs autorisées
+        return in_array($value, ['fr', 'en', 'both']) ? $value : 'fr';
+    }
+
+    /**
      * The accessors to append to the model's array form.
      *
      * @var array<int, string>

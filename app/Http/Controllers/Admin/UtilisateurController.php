@@ -70,11 +70,16 @@ class UtilisateurController extends Controller
         return view('admin.users.patients', compact('patients', 'stats'));
     }
 
-    public function bloquer($id)
+    public function bloquer(Request $request, $id)
     {
+        $request->validate([
+            'reason' => 'nullable|string|max:500'
+        ]);
+
         $user = User::findOrFail($id);
         $user->is_blocked = true;
         $user->blocked_at = now();
+        $user->block_reason = $request->input('reason');
         $user->save();
 
         return redirect()->back()->with('success', 'Patient bloqué avec succès. Il ne pourra plus se connecter.');

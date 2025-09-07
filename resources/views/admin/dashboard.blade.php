@@ -3,10 +3,11 @@
 @section('title', 'Dashboard')
 
 @push('styles')
-<link href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css" rel="stylesheet">
+
 <style>
     /* Reset des marges et conteneur */
-    .container-fluid {
+
+    /*.container-fluid {
         width: 100%;
         max-width: 100%;
         padding-right: 15px;
@@ -14,16 +15,18 @@
         margin-right: auto;
         margin-left: auto;
         box-sizing: border-box;
-    }
-    
-    /* Espacement des sections */
+    }*/
+
+    /* Espacement des sections 
     .dashboard-section {
-        padding: 1.5rem 0;
+        padding: 1 rem 0;
         margin: 0 auto;
         max-width: 100%;
         overflow-x: hidden;
     }
     
+    */
+
     @media (max-width: 1199.98px) {
         .quick-action-btn {
             padding: 0.5rem 1rem;
@@ -434,10 +437,10 @@
 @section('content')
 <div class="dashboard-section">
     <!-- En-tête avec actions rapides -->
-    <div class="row mb-4">
-        <div class="col-md-8">
-            <h1 class="text-white text-3xl font-bold mb-2 animate__animated animate__fadeInDown">
-                <i class="fas fa-tachometer-alt me-3"></i>
+    <div class="row mb-3">
+        <div class="col-md-9 px-5">
+            <h1 class="text-white text-3xl font-bold mb-5 animate__animated animate__fadeInDown">
+                <i class="fas fa-tachometer-alt  px-5"></i>
                 @php
                     $hour = now()->hour;
                     $greeting = 'Bienvenue';
@@ -451,11 +454,11 @@
                 @endphp
                 {{ $greeting }} M. {{ Auth::user()->name }}
             </h1>
-            <p class="text-white-50 animate__animated animate__fadeInDown animate__delay-1s">
+            <p class="text-white-50 animate__animated animate__fadeInDown animate__delay-1s px-4">
                 Tableau de bord administrateur - {{ date('d F Y') }}
             </p>
         </div>
-        <div class="col-md-4 text-end">
+        <div class="col-md-3 text-end">
             <div class="animate__animated animate__fadeInRight">
                 <button class="btn btn-light quick-action-btn" onclick="refreshDashboard()">
                     <i class="fas fa-sync-alt me-2"></i>Actualiser
@@ -468,8 +471,8 @@
     </div>
 
     <!-- Cartes de statistiques -->
-    <div class="row g-4 mb-5">
-        <div class="col-xxl-2 col-lg-3 col-md-4 col-sm-6 mb-4">
+    <div class="row g-4  px-5 mx-5">
+        <div class="col-xxl-2 col-lg-3 col-md-4 col-sm-6 mb-4 ">
             <div class="card text-black bg-gradient-success stats-card animate__animated animate__fadeInUp">
                 <div class="card-body text-center">
                     <div class="stats-icon mb-2">👥</div>
@@ -513,7 +516,7 @@
             </div>
         </div>
 
-        <div class="col-xxl-3 col-lg-4 col-md-6 col-sm-6 mb-4">
+        <div class="col-xxl-2 col-lg-3 col-md-4 col-sm-6 mb-4">
             <div class="card text-black bg-gradient-warning stats-card animate__animated animate__fadeInUp animate__delay-3s">
                 <div class="card-body text-center">
                     <div class="stats-icon mb-2">📅</div>
@@ -526,7 +529,7 @@
             </div>
         </div>
 
-        <div class="col-xxl-3 col-lg-4 col-md-6 col-sm-6 mb-4">
+        <div class="col-xxl-2 col-lg-3 col-md-4 col-sm-6 mb-4">
             <div class="card text-black bg-gradient-info stats-card animate__animated animate__fadeInUp animate__delay-4s">
                 <div class="card-body text-center">
                     <div class="stats-icon mb-2">🩺</div>
@@ -542,9 +545,9 @@
 
     <!-- Graphiques d'analyse -->
     <div class="row g-4 mb-5">
-        <div class="col-xxl-8 col-lg-7">
+        <div class="col-xxl-7 col-lg-7 px-5 mx-4">
             <div class="chart-container animate__animated animate__fadeInLeft text-black">
-                <h4 class="section-title mb-4 text-white">
+                <h4 class="section-title mb-4 px-5 mx-4 text-white">
                     <i class="fas fa-chart-line me-2 text-primary "></i>Évolution des inscriptions
                 </h4>
                 <canvas id="inscriptionsChart" height="100"></canvas>
@@ -560,10 +563,10 @@
         </div>
     </div>
 
-    <div class="row g-4 mb-5">
+    <div class="row g-3 mb-5">
         <div class="col-lg-6">
             <div class="chart-container animate__animated animate__fadeInUp  text-black">
-                <h4 class="section-title mb-4 text-white">
+                <h4 class="section-title mb-4 px-5 text-white">
                     <i class="fas fa-chart-bar me-2 text-info"></i>Consultations par mois
                 </h4>
                 <canvas id="consultationsChart" height="150"></canvas>
@@ -582,7 +585,7 @@
     <!-- Notifications et patients -->
     <div class="row g-4">
         <div class="col-12 col-lg-6">
-            <div class="animate__animated animate__fadeInLeft">
+            <div class="animate__animated animate__fadeInLeft px-5 mx-4">
                 <h4 class="section-title mb-4 text-white">
                     <i class="fas fa-bell me-2"></i>📢 Dernières notifications
                 </h4>
@@ -622,11 +625,11 @@
                             <div class="patient-avatar">
                                 <i class="fas fa-user-injured text-info"></i>
                             </div>
-                            <div class="patient-info">
+                            <div class="patient-info text-white">
                                 <h6 class="mb-0">{{ $patient->name }}</h6>
                                 <small>{{ $patient->email }}</small>
                             </div>
-                            <div class="d-flex align-items-center">
+                            <div class="d-flex align-items-center text-white">
                                 <span class="badge bg-{{ $patient->abonnement && $patient->abonnement->statut === 'actif' ? 'success' : 'secondary' }} me-2">
                                     {{ $patient->abonnement && $patient->abonnement->statut === 'actif' ? 'Abonné' : 'Non abonné' }}
                                 </span>

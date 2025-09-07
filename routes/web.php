@@ -1,6 +1,7 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Auth;
 use App\Http\Controllers\RoleRedirectController;
 use App\Http\Controllers\Admin\{
     AdminLoginController,
@@ -58,14 +59,18 @@ Route::get('/patient/analyses', [App\Http\Controllers\Patient\ImageAnalysisContr
 
 // Page d'accueil
 Route::get('/', function () {
-    $testimonials = \App\Models\Testimonial::where('approved', true)->latest()->take(6)->get();
     $medecins = \App\Models\User::where('role', 'medecin')
-        ->where('is_blocked', false)
-        ->latest()
-        ->take(4)
+        ->whereNull('blocked_at')
         ->get();
-    return view('welcome', compact('testimonials', 'medecins'));
-})->name('home');
+    
+    $testimonials = \App\Models\Testimonial::with('user')
+        ->where('approved', true)
+        ->latest()
+        ->take(5)
+        ->get();
+    
+    return view('welcome', compact('medecins', 'testimonials'));
+})->name('welcome');
 
 Route::get('/about', function () {
     return view('about');
@@ -124,9 +129,15 @@ Route::middleware(['auth', 'verified', App\Http\Middleware\RoleMiddleware::class
     // Pharmacies à proximité
     Route::get('/pharmacies', [\App\Http\Controllers\Patient\PharmacyController::class, 'index'])->name('pharmacies.index');
     // Ordonnances
-    Route::get('/ordonnances', [PrescriptionController::class, 'index'])->name('ordonnances');
-    Route::get('/ordonnances/{id}', [PrescriptionController::class, 'show'])->name('ordonnances.show');
-    Route::get('/ordonnances/{id}/download', [PrescriptionController::class, 'download'])->name('ordonnances.download');
+    Route::get('/ordonnances', [\App\Http\Controllers\Patient\OrdonnanceController::class, 'index'])->name('ordonnances.index');
+    Route::get('/ordonnances/derniere', [\App\Http\Controllers\Patient\OrdonnanceController::class, 'latest'])->name('ordonnances.latest');
+    Route::get('/ordonnances/{id}', [\App\Http\Controllers\Patient\OrdonnanceController::class, 'show'])->name('ordonnances.show');
+    Route::get('/ordonnances/{id}/view', [\App\Http\Controllers\Patient\OrdonnanceController::class, 'view'])->name('ordonnances.view');
+    Route::get('/ordonnances/{id}/download', [\App\Http\Controllers\Patient\OrdonnanceController::class, 'download'])->name('ordonnances.download');
+    
+    // Fichiers joints aux ordonnances
+    Route::get('/ordonnances/fichiers/{fichierId}/afficher', [\App\Http\Controllers\Patient\OrdonnanceController::class, 'showFichier'])->name('ordonnances.fichiers.afficher');
+    Route::get('/ordonnances/fichiers/{fichierId}/telecharger', [\App\Http\Controllers\Patient\OrdonnanceController::class, 'downloadFichier'])->name('ordonnances.fichiers.telecharger');
 
     // Examens
     Route::get('/examens', [ExamResultController::class, 'index'])->name('examens');
@@ -162,6 +173,16 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'verified', \App\Htt
     // Dashboard
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
     
+    // Gestion des médicaments
+    Route::resource('medicaments', \App\Http\Controllers\Admin\MedicamentController::class);
+    Route::get('medicaments-search', [\App\Http\Controllers\Admin\MedicamentController::class, 'search'])
+        ->name('medicaments.search');
+    
+    // Gestion des ordonnances
+    Route::resource('ordonnances', \App\Http\Controllers\Admin\OrdonnanceController::class);
+    Route::get('ordonnances/{ordonnance}/download', [\App\Http\Controllers\Admin\OrdonnanceController::class, 'download'])
+        ->name('ordonnances.download');
+    
     // Gestion du profil administrateur
     Route::prefix('profile')->name('profile.')->group(function () {
         Route::get('/', [AdminProfileController::class, 'edit'])->name('edit');
@@ -182,7 +203,7 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'verified', \App\Htt
     Route::get('/medecins/{id}', [AdminDoctorApplicationController::class, 'showMedecin'])->name('medecins.show');
     Route::get('/medecins/export/csv', [AdminDoctorApplicationController::class, 'exportMedecins'])->name('medecins.export');
     Route::get('/medecins/statistiques', [AdminDoctorApplicationController::class, 'statistiques'])->name('medecins.statistiques');
-    Route::delete('/medecins/{id}', [DoctorApplicationController::class, 'destroy'])->name('medecins.destroy');
+    Route::delete('/medecins/{id}', [AdminDoctorApplicationController::class, 'destroy'])->name('medecins.destroy');
     Route::post('/medecins/{id}/bloquer', [AdminDoctorApplicationController::class, 'bloquerMedecin'])->name('medecins.bloquer');
     Route::post('/medecins/{id}/debloquer', [AdminDoctorApplicationController::class, 'debloquerMedecin'])->name('medecins.debloquer');
     Route::post('/medecins/{id}/alerte', [AdminDoctorApplicationController::class, 'envoyerAlerte'])->name('medecins.alerte');
@@ -199,7 +220,8 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'verified', \App\Htt
     Route::get('/announcements', [AnnonceController::class, 'index'])->name('announcements'); // Alias pour compatibilité
     
     // Gestion des consultations
-    Route::get('/consultations', [ConsultationController::class, 'index'])->name('consultations.index');
+    Route::resource('consultations', ConsultationController::class)->only(['index', 'show', 'update']);
+    Route::put('consultations/{consultation}/status', [ConsultationController::class, 'updateStatus'])->name('consultations.status.update');
 
     // Gestion des témoignages
     Route::get('/testimonials', [TemoignageController::class, 'index'])->name('testimonials');
@@ -207,7 +229,8 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'verified', \App\Htt
     Route::delete('/testimonials/{id}', [TemoignageController::class, 'destroy'])->name('testimonials.destroy');
 
     // Gestion des abonnements
-    Route::get('/abonnements', [AbonnementController::class, 'index'])->name('abonnements.index');
+    Route::resource('abonnements', AbonnementController::class)->except(['create', 'edit']);
+    Route::get('abonnements/export', [AbonnementController::class, 'export'])->name('abonnements.export');
     Route::get('/subscriptions', [AbonnementController::class, 'index'])->name('subscriptions'); // Alias pour compatibilité
 
     // Gestion des contacts
@@ -241,11 +264,25 @@ Route::middleware(['auth', 'verified', \App\Http\Middleware\CheckBlockedUser::cl
         Route::post('/upload-image', [\App\Http\Controllers\Medecin\NewAnnonceController::class, 'uploadImage'])
             ->name('upload.image');
     });
+    
+    // Gestion du planning
+    // Gestion des plannings
+    Route::prefix('planning')->name('planning.')->group(function() {
+        Route::get('/', [\App\Http\Controllers\Medecin\PlanningController::class, 'index'])->name('index');
+        Route::get('/create', [\App\Http\Controllers\Medecin\PlanningController::class, 'create'])->name('create');
+        Route::post('/', [\App\Http\Controllers\Medecin\PlanningController::class, 'store'])->name('store');
+        Route::get('/{planning}', [\App\Http\Controllers\Medecin\PlanningController::class, 'show'])->name('show');
+        Route::get('/{planning}/edit', [\App\Http\Controllers\Medecin\PlanningController::class, 'edit'])->name('edit');
+        Route::put('/{planning}', [\App\Http\Controllers\Medecin\PlanningController::class, 'update'])->name('update');
+        Route::delete('/{planning}', [\App\Http\Controllers\Medecin\PlanningController::class, 'destroy'])->name('destroy');
+        Route::get('/historique', [\App\Http\Controllers\Medecin\PlanningController::class, 'getHistorique'])->name('historique');
+    });
     Route::get('/profile/edit', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::put('/profile/update', [ProfileController::class, 'update'])->name('profile.update');
 
     // Abonnements
     Route::get('/abonnements', [MedecinAbonnementController::class, 'index'])->name('abonnements.index');
+    Route::get('/patients', [MedecinAbonnementController::class, 'listPatients'])->name('patients.list');
     Route::get('/abonnements/patients', [MedecinAbonnementController::class, 'patients'])->name('abonnements.patients');
     Route::get('/abonnements/{id}/edit', [MedecinAbonnementController::class, 'edit'])->name('abonnements.edit');
     Route::put('/abonnements/{id}', [MedecinAbonnementController::class, 'update'])->name('abonnements.update');
@@ -311,8 +348,9 @@ Route::middleware(['auth', 'verified', \App\Http\Middleware\RoleMiddleware::clas
     Route::resource('documents', DocumentController::class)->names('documents');
 
     // Paiement
-    Route::get('/paiement/form', [PaymentController::class, 'form'])->name('paiement.form');
-    Route::post('/paiement/verify', [PaymentController::class, 'verify'])->name('paiement.verify');
+    Route::get('/paiement', [PaymentController::class, 'showForm'])->name('paiement.form');
+    Route::post('/paiement/process', [PaymentController::class, 'process'])->name('paiement.process');
+    Route::get('/paiement/verify', [PaymentController::class, 'verify'])->name('paiement.verify');
 
     // Rendez-vous
     Route::resource('appointments', AppointmentController::class)->names('appointments');
@@ -341,4 +379,16 @@ Route::middleware(['auth:sanctum', config('jetstream.auth_session'), 'verified',
 Route::get('/solution', function () {
     return view('solution');
 })->name('solution');
+
+// Routes de déconnexion personnalisées
+Route::post('/logout', function () {
+    Auth::logout();
+    return redirect('/');
+})->name('logout');
+
+// Permettre la déconnexion via GET pour la rétrocompatibilité
+Route::get('/logout', function () {
+    Auth::logout();
+    return redirect('/');
+})->name('logout.get');
 

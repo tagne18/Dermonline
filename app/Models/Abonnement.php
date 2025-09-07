@@ -12,9 +12,18 @@ class Abonnement extends Model
         'user_id',
         'medecin_id',
         'type',
+        'reference',
+        'montant',
+        'transaction_id',
         'date_debut',
         'date_fin',
         'statut',
+    ];
+
+    protected $casts = [
+        'date_debut' => 'date',
+        'date_fin' => 'date',
+        'montant' => 'decimal:2',
     ];
 
     /**

@@ -202,7 +202,7 @@
     <!-- Navigation -->
     <nav class="navbar navbar-expand-lg navbar-light bg-white shadow-sm sticky-top">
         <div class="container">
-            <a class="navbar-brand fw-bold fs-4" href="{{ route('home') }}">
+            <a class="navbar-brand fw-bold fs-4" href="{{ route('welcome') }}">
                 <span class="text-primary">Derm</span>online
             </a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
@@ -211,7 +211,7 @@
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav ms-auto">
                     <li class="nav-item">
-                        <a class="nav-link" href="{{ route('home') }}">Accueil</a>
+                        <a class="nav-link" href="{{ route('welcome') }}">Accueil</a>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link active" href="{{ route('about') }}">À propos</a>
@@ -419,7 +419,7 @@
                 <div class="timeline-item">
                     <div class="timeline-dot"></div>
                     <div class="timeline-content">
-                        <h4>2024 - Lancement beta</h4>
+                        <h4>2025 - Lancement beta</h4>
                         <p class="text-muted">Première version de la plateforme avec un groupe 
                         de dermatologues partenaires au Cameroun.</p>
                     </div>
@@ -432,6 +432,7 @@
                         <p class="text-muted">Développement de nouvelles fonctionnalités et 
                         expansion vers d'autres pays d'Afrique francophone.</p>
                     </div>
+                    
                 </div>
             </div>
         </div>
@@ -525,7 +526,7 @@
     </section>
 
     <!-- Footer -->
-    <footer class="bg-dark text-white py-5">
+    <footer class="bg-gray text-black py-5">
         <div class="container">
             <div class="row g-4">
                 <div class="col-lg-4">
@@ -576,9 +577,9 @@
                 </div>
             </div>
             <hr class="my-4">
-            <div class="text-center">
+            <!-- <div class="text-center">
                 <p class="text-muted mb-0">&copy; 2025 Dermonline. Tous droits réservés.</p>
-            </div>
+            </div> -->
         </div>
     </footer>
 

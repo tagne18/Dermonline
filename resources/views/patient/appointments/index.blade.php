@@ -218,7 +218,7 @@
                                         <label for="photo-upload" class="inline-flex items-center px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 cursor-pointer transition-colors">
                                             <i class="bi bi-plus me-2"></i>Sélectionner des photos
                                         </label>
-                                        <p class="text-xs text-gray-500 mt-2">Formats acceptés : JPG, PNG. Max 5 photos, 5MB chacune</p>
+                                       
                                     </div>
                                 </div>
 

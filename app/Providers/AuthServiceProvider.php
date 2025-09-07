@@ -16,6 +16,7 @@ class AuthServiceProvider extends ServiceProvider
      */
     protected $policies = [
         NewAnnonce::class => NewAnnoncePolicy::class,
+        \App\Models\Planning::class => \App\Policies\PlanningPolicy::class,
     ];
 
     /**

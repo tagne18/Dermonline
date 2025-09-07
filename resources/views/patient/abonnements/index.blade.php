@@ -289,7 +289,7 @@
                                     <div class="feature-icon available">
                                         <i class="bi bi-check-lg"></i>
                                     </div>
-                                    <span>Consultations de base illimitées</span>
+                                    <span>Consultations de base limitées</span>
                                 </li>
                                 <li class="feature-item">
                                     <div class="feature-icon available">
@@ -318,7 +318,7 @@
                             </ul>
                             
                             <div class="mt-4">
-                                <button class="btn btn-outline-modern btn-modern w-100">
+                                <button class="btn btn-primary-modern btn-modern w-100 ">
                                     <i class="bi bi-person-plus me-2"></i>S'inscrire
                                 </button>
                             </div>
@@ -378,9 +378,9 @@
                             </ul>
                             
                             <div class="mt-4">
-                                <button class="btn btn-primary-modern btn-modern w-100" data-bs-toggle="modal" data-bs-target="#modalSouscriptionPremium">
+                                <a href="{{ route('patient.paiement.form') }}?pack=premium&montant=5000" class="btn btn-primary-modern btn-modern w-100">
     <i class="bi bi-crown me-2"></i>Souscrire Maintenant
-</button>
+</a>
                             </div>
                         </div> 
                     </div>
@@ -435,7 +435,7 @@
                             </ul>
                             
                             <div class="mt-4">
-                                <button class="btn btn-outline-modern btn-modern w-100">
+                                <button class="btn btn-primary-modern btn-modern w-100">
                                     <i class="bi bi-gem me-2"></i>Souscrire
                                 </button>
                             </div>

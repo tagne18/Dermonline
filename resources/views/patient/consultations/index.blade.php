@@ -15,55 +15,22 @@
         <div class="row">
             <div class="col-12">
                 <!-- Notifications Section -->
-                <div class="card border-0 shadow-sm mb-4 notification-card">
-                    <div class="card-header  text-white border-0 rounded-top">
-                        <div class="d-flex align-items-center">
-                            <i class="fas fa-bell me-2"></i>
-                            <h5 class="mb-0 fw-semibold">Notifications</h5>
-                        </div>
-                    </div>
-                    <div class="card-body">
-                        @if(isset($notifications) && $notifications->count())
-                            <div class="row g-3">
-                                @foreach($notifications as $notification)
-                                    <div class="col-12">
-                                        <div class="notification-item p-3 bg-light rounded-3 border-start border-4 position-relative overflow-hidden">
-                                            <div class="notification-glow"></div>
-                                            <div class="d-flex justify-content-between align-items-start">
-                                                <div class="flex-grow-1">
-                                                    <h6 class="fw-bold text-dark mb-1">
-                                                        <i class="fas fa-info-circle text-primary me-2"></i>
-                                                        {{ $notification->data['title'] ?? 'Notification' }}
-                                                    </h6>
-                                                    <p class="text-muted mb-1 small">
-                                                        {{ $notification->data['message'] ?? $notification->data['status'] ?? 'Notification reçue' }}
-                                                    </p>
-                                                    <small class="text-muted">
-                                                        <i class="fas fa-clock me-1"></i>
-                                                        {{ $notification->created_at ? $notification->created_at->diffForHumans() : '' }}
-                                                    </small>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                @endforeach
-                            </div>
-                        @else
-                            <div class="text-center py-4">
-                                <i class="fas fa-bell-slash text-muted mb-3" style="font-size: 3rem; opacity: 0.3;"></i>
-                                <p class="text-muted mb-0">Aucune notification récente.</p>
-                            </div>
-                        @endif
+                <div class="container">
+                    <div class="title">
+                        <h1>
+                            notification
+                        </h1>
                     </div>
                 </div>
-
+                <!-- /Notification Section -->
+                 
                 <!-- Appointments Section -->
-                <div class="card border-0 shadow-sm appointments-card">
+                <div class="card border-0 shadow-sm appointments-card py-5 mt-5">
                     <div class="card-header bg-gradient-success text-white border-0 rounded-top">
                         <div class="d-flex align-items-center justify-content-between">
                             <div class="d-flex align-items-center">
                                 <i class="fas fa-calendar-alt me-2"></i>
-                                <h5 class="mb-0 fw-semibold">Mes rendez-vous à venir</h5>
+                                <h5 class="mb-0 fw-semibold text-dark fz-6">Mes rendez-vous à venir</h5>
                             </div>
                             <span class="badge bg-light text-dark">
                                 {{ isset($appointments) ? $appointments->where('statut', '!=', 'refuse')->count() : 0 }}

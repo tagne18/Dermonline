@@ -40,6 +40,6 @@ class DoctorApplicationController extends Controller
         // Création de l'enregistrement
         DoctorApplication::create($validated);
 
-        return redirect()->route('home')->with('success', 'Votre demande a été soumise avec succès. Nous vous contacterons sous 48h.');
+        return redirect('/')->with('success', 'Votre demande a été soumise avec succès. Nous vous contacterons sous 48h.');
     }
 }

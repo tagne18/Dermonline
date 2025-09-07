@@ -21,3 +21,6 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 
 // Route pour l'IA Gemini (sans CSRF)
 Route::post('/ia/gemini', [GeminiController::class, 'ask']);
+
+// Routes du tableau de bord
+require __DIR__.'/api/dashboard.php';

@@ -39,7 +39,12 @@ return [
 
   'gemini' => [
     'key' => env('GEMINI_API_KEY'),
-],
+  ],
 
+  'noupia' => [
+    'api_key' => env('NOUPIA_API_KEY', 'CdeCvHo5faqh9v.qhxSsnxcyDp34COlz1zyKfd5FbrWb55_m4gO9qXcP8NMlgLXvB59ZLoVJXyaE.o2mwktRyjxnsZgkRP053lz2sMtf3fRB.R7qy3mISQA8OGbCuZwy'),
+    'product_key' => env('NOUPIA_PRODUCT_KEY', '1SaY2s9Z.C8WKOZcXhGfehz3K4pQ4f06YyHVaKL7pW0GEGoMKWPkzQQySQ.LZqqA0ABUEtAX2ciXkczLXnhTNqpaeusQ5nI0ySawgqZx1tGqxi1lB2khtnN.7hwDzL1L'),
+    'mode' => env('NOUPIA_MODE', 'test'), // 'test' ou 'live'
+  ],
 
 ];

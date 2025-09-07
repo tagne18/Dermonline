@@ -277,15 +277,13 @@
                                         </a>
                                         
                                         @if(!$patient->is_blocked)
-                                            <form action="{{ route('admin.utilisateurs.bloquer', $patient->id) }}" 
-                                                  method="POST" class="d-inline">
-                            @csrf
-                                                <button type="submit" class="btn btn-sm btn-warning" 
-                                                        title="Bloquer le compte"
-                                                        onclick="return confirm('Êtes-vous sûr de vouloir bloquer ce patient ?')">
-                                                    <i class="fas fa-ban"></i>
-                                                </button>
-                        </form>
+                                            <button type="button" 
+                                                    class="btn btn-sm btn-warning btn-block-patient" 
+                                                    data-id="{{ $patient->id }}"
+                                                    data-name="{{ $patient->name }}"
+                                                    title="Bloquer le compte">
+                                                <i class="fas fa-ban"></i>
+                                            </button>
                     @else
                                             <form action="{{ route('admin.utilisateurs.debloquer', $patient->id) }}" 
                                                   method="POST" class="d-inline">
@@ -297,16 +295,13 @@
                         </form>
                     @endif
                                         
-                                        <form action="{{ route('admin.users.patients.destroy', $patient->id) }}" 
-                                              method="POST" class="d-inline">
-                                            @csrf
-                                            @method('DELETE')
-                                            <button type="submit" class="btn btn-sm btn-danger" 
-                                                    title="Supprimer définitivement"
-                                                    onclick="return confirm('Êtes-vous sûr de vouloir supprimer ce patient ? Cette action est irréversible.')">
-                                                <i class="fas fa-trash"></i>
-                                            </button>
-                                        </form>
+                                        <button type="button" 
+                                                class="btn btn-sm btn-danger btn-delete-patient" 
+                                                data-id="{{ $patient->id }}"
+                                                data-name="{{ $patient->name }}"
+                                                title="Supprimer définitivement">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
                         </div>
                     </td>
                 </tr>
@@ -332,20 +327,52 @@
     </div>
 </div>
 
-<!-- Modal de confirmation pour les actions importantes -->
-<div class="modal fade" id="confirmModal" tabindex="-1">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title">Confirmation</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+<!-- Modal de confirmation pour le blocage d'un patient -->
+<div class="modal fade" id="blockPatientModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow">
+            <div class="modal-header bg-warning text-white">
+                <h5 class="modal-title fw-bold">
+                    <i class="fas fa-exclamation-triangle me-2"></i>
+                    Confirmer le blocage
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Fermer"></button>
             </div>
             <div class="modal-body">
-                <p id="confirmMessage"></p>
+                <div class="d-flex align-items-center mb-4">
+                    <div class="flex-shrink-0 me-3">
+                        <i class="fas fa-user-times text-warning fa-3x"></i>
+                    </div>
+                    <div>
+                        <h5 class="fw-bold mb-1" id="patientName"></h5>
+                        <p class="text-muted mb-0">
+                            Êtes-vous sûr de vouloir bloquer l'accès de ce patient ?
+                        </p>
+                    </div>
+                </div>
+                
+                <div class="mb-3">
+                    <label for="blockReason" class="form-label">Raison du blocage (optionnel) :</label>
+                    <textarea class="form-control" id="blockReason" rows="2" placeholder="Motif du blocage..."></textarea>
+                    <div class="form-text">Cette information sera enregistrée mais ne sera pas visible par le patient.</div>
+                </div>
+                
+                <div class="alert alert-warning" role="alert">
+                    <i class="fas fa-info-circle me-2"></i>
+                    Le patient ne pourra plus se connecter à son compte jusqu'à son déblocage.
+                </div>
             </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
-                <button type="button" class="btn btn-danger" id="confirmAction">Confirmer</button>
+            <div class="modal-footer bg-light">
+                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">
+                    <i class="fas fa-times me-1"></i> Annuler
+                </button>
+                <form id="blockPatientForm" method="POST" action="">
+                    @csrf
+                    <input type="hidden" name="reason" id="blockReasonInput">
+                    <button type="submit" class="btn btn-warning">
+                        <i class="fas fa-lock me-1"></i> Confirmer le blocage
+                    </button>
+                </form>
             </div>
         </div>
     </div>
@@ -355,12 +382,34 @@
 
 @push('scripts')
 <script>
-// Fonction pour confirmer les actions importantes
-function confirmAction(message, action) {
-    document.getElementById('confirmMessage').textContent = message;
-    document.getElementById('confirmAction').onclick = action;
-    new bootstrap.Modal(document.getElementById('confirmModal')).show();
-}
+// Initialisation du modal de blocage
+const blockPatientModal = new bootstrap.Modal(document.getElementById('blockPatientModal'));
+
+// Gestion du clic sur le bouton de blocage
+document.querySelectorAll('.btn-block-patient').forEach(button => {
+    button.addEventListener('click', function(e) {
+        e.preventDefault();
+        
+        // Récupération des données du patient
+        const patientId = this.dataset.id;
+        const patientName = this.dataset.name;
+        
+        // Mise à jour du modal
+        document.getElementById('patientName').textContent = patientName;
+        document.getElementById('blockPatientForm').action = `/admin/users/patients/${patientId}/block`;
+        document.getElementById('blockReason').value = '';
+        
+        // Affichage du modal
+        blockPatientModal.show();
+    });
+});
+
+// Gestion de la soumission du formulaire de blocage
+document.getElementById('blockPatientForm').addEventListener('submit', function(e) {
+    // Copie de la raison dans le champ caché
+    document.getElementById('blockReasonInput').value = document.getElementById('blockReason').value;
+    return true;
+});
 
 // Auto-submit du formulaire de recherche lors du changement de filtres
 document.querySelectorAll('#abonnement, #statut, #sort, #order').forEach(select => {

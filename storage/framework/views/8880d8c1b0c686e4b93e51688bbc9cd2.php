@@ -1,0 +1,1 @@
+<?php /**PATH /home/tagne/Desktop/DSL/dermonline/resources/views/medecin/dossiers/index.blade.php ENDPATH**/ ?>

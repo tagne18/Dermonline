@@ -7,7 +7,6 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\Rule;
-use Intervention\Image\Facades\Image;
 
 class ProfileController extends Controller
 {
@@ -42,19 +41,24 @@ class ProfileController extends Controller
 
         // Gestion de la photo de profil
         if ($request->hasFile('profile_photo')) {
+            // Validation de l'image
+            $request->validate([
+                'profile_photo' => 'image|mimes:jpeg,png,jpg,gif|max:2048', // 2MB max
+            ]);
+
+            // Créer le répertoire s'il n'existe pas
+            if (!Storage::disk('public')->exists('profile-photos')) {
+                Storage::disk('public')->makeDirectory('profile-photos');
+            }
+
             // Supprimer l'ancienne photo si elle existe
             if ($user->profile_photo_path) {
                 Storage::disk('public')->delete($user->profile_photo_path);
             }
 
             // Enregistrer la nouvelle photo
-            $imagePath = $request->file('profile_photo')->store('profile-photos', 'public');
-            
-            // Redimensionner l'image
-            $image = Image::make(public_path("storage/{$imagePath}"))->fit(500, 500);
-            $image->save();
-
-            $user->profile_photo_path = $imagePath;
+            $path = $request->file('profile_photo')->store('profile-photos', 'public');
+            $user->profile_photo_path = $path;
         }
 
         $user->save();

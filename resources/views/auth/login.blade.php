@@ -319,7 +319,7 @@
     <div class="overlay-bg"></div>
 
     <!-- Bouton retour -->
-    <a href="{{ route('home') }}" class="back-to-home">
+    <a href="{{ route('welcome') }}" class="back-to-home">
         <i class="bi bi-arrow-left me-2"></i>Retour à l'accueil
     </a>
 

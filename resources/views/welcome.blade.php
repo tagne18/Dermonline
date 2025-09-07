@@ -956,7 +956,79 @@
             </div>
         </div>
     </section>
-
+    
+    <!-- Domaines de consultation -->
+<section class="py-5 bg-light">
+    <div class="container">
+        <div class="row justify-content-center mb-5">
+            <div class="col-lg-8 text-center">
+                <h2 class="display-5 fw-bold mb-3">Nos domaines de consultation en ligne</h2>
+                <p class="lead text-muted">Accédez à des soins médicaux de qualité depuis chez vous, grâce à nos spécialistes qualifiés</p>
+            </div>
+        </div>
+        
+        <div class="row g-4">
+            <!-- Dermatologie -->
+            <div class="col-md-6 col-lg-3">
+                <div class="card h-100 border-0 shadow-sm hover-shadow transition-all">
+                    <div class="card-body text-center p-4">
+                        <div class="icon-lg bg-soft-primary text-primary rounded-circle mb-4 mx-auto">
+                            <i class="fas fa-allergies"></i>
+                        </div>
+                        <h5 class="h6 mb-3">Dermatologie</h5>
+                        <p class="text-muted small mb-0">Diagnostic et traitement des maladies de la peau, des cheveux et des ongles</p>
+                        <a href="{{ route('login')}}">
+                            <div class="btn btn-primary">commencer</div>
+                        </a>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Gynécologie -->
+            <div class="col-md-6 col-lg-3">
+                <div class="card h-100 border-0 shadow-sm hover-shadow transition-all">
+                    <div class="card-body text-center p-4">
+                        <div class="icon-lg bg-soft-pink text-pink rounded-circle mb-4 mx-auto">
+                            <i class="fas fa-female"></i>
+                        </div>
+                        <h5 class="h6 mb-3">Gynécologie</h5>
+                        <p class="text-muted small mb-0">Suivi gynécologique et conseils pour la santé féminine à tout âge</p>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Pédiatrie -->
+            <div class="col-md-6 col-lg-3">
+                <div class="card h-100 border-0 shadow-sm hover-shadow transition-all">
+                    <div class="card-body text-center p-4">
+                        <div class="icon-lg bg-soft-warning text-warning rounded-circle mb-4 mx-auto">
+                            <i class="fas fa-baby"></i>
+                        </div>
+                        <h5 class="h6 mb-3">Pédiatrie</h5>
+                        <p class="text-muted small mb-0">Soins médicaux spécialisés pour les nourrissons, enfants et adolescents</p>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Médecine Générale -->
+            <div class="col-md-6 col-lg-3">
+                <div class="card h-100 border-0 shadow-sm hover-shadow transition-all">
+                    <div class="card-body text-center p-4">
+                        <div class="icon-lg bg-soft-info text-info rounded-circle mb-4 mx-auto">
+                            <i class="fas fa-stethoscope"></i>
+                        </div>
+                        <h5 class="h6 mb-3">Médecine Générale</h5>
+                        <p class="text-muted small mb-0">Premier recours pour le diagnostic et le suivi des problèmes de santé courants</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="text-center mt-5">
+            <a href="#" class="btn btn-primary px-4">Voir toutes les spécialités</a>
+        </div>
+    </div>
+</section>
     <!-- Team Section -->
     <section id="doctors" class="section bg-light">
         <div class="container">
@@ -1299,7 +1371,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     <ul class="list-unstyled">
                         <li><a href="mailto:contact@dermonline.com">contact@dermonline.com</a></li>
                         <li><a href="tel:+237 681531181">+237 681531181</a></li>
-                        <li>123 Rue de la Santé, 75001 Paris, France</li>
+                        <li>IAI-CAMEROUN </li>
                     </ul>
                 </div>
                 
@@ -1324,9 +1396,9 @@ document.addEventListener('DOMContentLoaded', function() {
             
             <hr class="my-4 bg-light opacity-25">
             
-            <div class="text-center">
+            <!-- <div class="text-center">
                 <p class="mb-0"> 2025 Dermonline. Tous droits réservés.</p>
-            </div>
+            </div> -->
         </div>
     </footer>
 

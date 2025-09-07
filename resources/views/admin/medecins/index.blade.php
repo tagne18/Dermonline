@@ -215,24 +215,135 @@
                                                 
                                                 <!-- Bouton bloquer/débloquer -->
                                                 @if($medecin->is_blocked)
-                                                    <form action="{{ route('admin.medecins.debloquer', $medecin->id) }}" 
-                                                          method="POST" class="d-inline">
-                                                        @csrf
-                                                        <button type="submit" class="btn btn-success btn-sm" 
-                                                                onclick="return confirm('Débloquer ce médecin ?')"
-                                                                title="Débloquer">
-                                                            🔓
-                                                        </button>
-                                                    </form>
+                                                    <button type="button" class="btn btn-success btn-sm" 
+                                                            data-bs-toggle="modal" 
+                                                            data-bs-target="#unblockDoctorModal{{ $medecin->id }}"
+                                                            title="Débloquer le médecin">
+                                                        <i class="fas fa-unlock"></i>
+                                                    </button>
+
+                                                    <!-- Modal de confirmation de déblocage -->
+                                                    <div class="modal fade modal-unblock" id="unblockDoctorModal{{ $medecin->id }}" tabindex="-1" aria-hidden="true">
+                                                        <div class="modal-dialog modal-dialog-centered">
+                                                            <div class="modal-content border-0 shadow">
+                                                                <div class="modal-header bg-success text-white">
+                                                                    <h5 class="modal-title fw-bold">
+                                                                        <i class="fas fa-unlock-alt me-2"></i>
+                                                                        Débloquer l'accès
+                                                                    </h5>
+                                                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fermer"></button>
+                                                                </div>
+                                                                <form action="{{ route('admin.medecins.debloquer', $medecin->id) }}" method="POST">
+                                                                    @csrf
+                                                                    <div class="modal-body">
+                                                                        <div class="d-flex align-items-center mb-4">
+                                                                            <div class="flex-shrink-0 me-3">
+                                                                                <div class="avatar-lg">
+                                                                                    <img src="{{ $medecin->profile_photo_url }}" alt="{{ $medecin->name }}" class="img-thumbnail rounded-circle">
+                                                                                </div>
+                                                                            </div>
+                                                                            <div class="flex-grow-1">
+                                                                                <h6 class="mb-1">{{ $medecin->name }}</h6>
+                                                                                <p class="text-muted mb-0">
+                                                                                    <i class="fas fa-envelope me-1"></i> {{ $medecin->email }}
+                                                                                </p>
+                                                                                <p class="text-muted mb-0">
+                                                                                    <i class="fas fa-stethoscope me-1"></i> {{ $medecin->specialite ?? 'Non spécifiée' }}
+                                                                                </p>
+                                                                                @if($medecin->blocked_at)
+                                                                                    <p class="text-danger small mt-2">
+                                                                                        <i class="fas fa-calendar-times me-1"></i> Bloqué le {{ \Carbon\Carbon::parse($medecin->blocked_at)->format('d/m/Y à H:i') }}
+                                                                                        @if($medecin->block_reason)
+                                                                                            <br><i class="fas fa-comment me-1"></i> Raison : {{ $medecin->block_reason }}
+                                                                                        @endif
+                                                                                    </p>
+                                                                                @endif
+                                                                            </div>
+                                                                        </div>
+                                                                        
+                                                                        <div class="alert alert-info">
+                                                                            <div class="d-flex align-items-center">
+                                                                                <i class="fas fa-info-circle me-2"></i>
+                                                                                <div>
+                                                                                    <strong>Information :</strong> Le médecin retrouvera immédiatement l'accès à son compte.
+                                                                                </div>
+                                                                            </div>
+                                                                        </div>
+                                                                    </div>
+                                                                    <div class="modal-footer bg-light">
+                                                                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                                                                            <i class="fas fa-times me-1"></i> Annuler
+                                                                        </button>
+                                                                        <button type="submit" class="btn btn-success">
+                                                                            <i class="fas fa-check me-1"></i> Confirmer le déblocage
+                                                                        </button>
+                                                                    </div>
+                                                                </form>
+                                                            </div>
+                                                        </div>
+                                                    </div>
                                                 @else
-                                                    <form action="{{ route('admin.medecins.bloquer', $medecin->id) }}" 
-                                                          method="POST" class="d-inline">
-                                                        @csrf
-                                                        <button type="submit" class="btn btn-danger btn-sm" 
-                                                                onclick="return confirm('Bloquer ce médecin ? Il ne pourra plus se connecter.')"
-                                                                title="Bloquer">
-                                                            🔒
-                                                        </button>
+                                                    <button type="button" class="btn btn-warning btn-sm" 
+                                                            data-bs-toggle="modal" 
+                                                            data-bs-target="#blockDoctorModal{{ $medecin->id }}"
+                                                            title="Bloquer le médecin">
+                                                        <i class="fas fa-lock"></i>
+                                                    </button>
+
+                                                    <!-- Modal de confirmation de blocage -->
+                                                    <div class="modal fade" id="blockDoctorModal{{ $medecin->id }}" tabindex="-1" aria-hidden="true">
+                                                        <div class="modal-dialog modal-dialog-centered">
+                                                            <div class="modal-content border-0 shadow">
+                                                                <div class="modal-header bg-warning text-dark">
+                                                                    <h5 class="modal-title fw-bold">
+                                                                        <i class="fas fa-user-lock me-2"></i>
+                                                                        Bloquer l'accès
+                                                                    </h5>
+                                                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fermer"></button>
+                                                                </div>
+                                                                <form action="{{ route('admin.medecins.bloquer', $medecin->id) }}" method="POST">
+                                                                    @csrf
+                                                                    <div class="modal-body">
+                                                                        <div class="d-flex align-items-center mb-4">
+                                                                            <div class="flex-shrink-0 me-3">
+                                                                                <i class="fas fa-user-md text-warning fa-3x"></i>
+                                                                            </div>
+                                                                            <div>
+                                                                                <h5 class="fw-bold mb-1">Bloquer le Dr. {{ $medecin->name }} ?</h5>
+                                                                                <p class="text-muted mb-0">
+                                                                                    Ce médecin ne pourra plus se connecter à son compte jusqu'à ce que vous le débloquiez.
+                                                                                </p>
+                                                                            </div>
+                                                                        </div>
+                                                                        
+                                                                        <div class="mb-3">
+                                                                            <label for="blockReason{{ $medecin->id }}" class="form-label fw-semibold">
+                                                                                <i class="fas fa-comment-alt me-2 text-warning"></i>Raison du blocage (optionnel)
+                                                                            </label>
+                                                                            <textarea class="form-control" 
+                                                                                    id="blockReason{{ $medecin->id }}" 
+                                                                                    name="raison" 
+                                                                                    rows="2" 
+                                                                                    placeholder="Précisez la raison du blocage..."></textarea>
+                                                                        </div>
+                                                                        
+                                                                        <div class="alert alert-warning" role="alert">
+                                                                            <i class="fas fa-exclamation-circle me-2"></i>
+                                                                            <strong>Note :</strong> Vous pourrez débloquer ce médecin à tout moment.
+                                                                        </div>
+                                                                    </div>
+                                                                    <div class="modal-footer bg-light">
+                                                                        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">
+                                                                            <i class="fas fa-times me-2"></i>Annuler
+                                                                        </button>
+                                                                        <button type="submit" class="btn btn-warning text-white">
+                                                                            <i class="fas fa-lock me-2"></i>Confirmer le blocage
+                                                                        </button>
+                                                                    </div>
+                                                                </form>
+                                                            </div>
+                                                        </div>
+                                                    </div>
                                                     </form>
                                                 @endif
                                                 
@@ -241,47 +352,117 @@
                                                       method="POST" class="d-inline">
                                                     @csrf
                                                     @method('DELETE')
-                                                    <button type="submit" class="btn btn-danger btn-sm" 
-                                                            onclick="return confirm('Supprimer définitivement ce médecin ?')"
+                                                    <button type="button" class="btn btn-danger btn-sm" 
+                                                            data-bs-toggle="modal" 
+                                                            data-bs-target="#deleteDoctorModal{{ $medecin->id }}"
                                                             title="Supprimer">
-                                                        🗑️
+                                                        <i class="fas fa-trash-alt"></i>
                                                     </button>
+
+                                                    <!-- Modal de confirmation de suppression -->
+                                                    <div class="modal fade" id="deleteDoctorModal{{ $medecin->id }}" tabindex="-1" aria-hidden="true">
+                                                        <div class="modal-dialog modal-dialog-centered">
+                                                            <div class="modal-content border-0 shadow">
+                                                                <div class="modal-header bg-danger text-white">
+                                                                    <h5 class="modal-title fw-bold">
+                                                                        <i class="fas fa-exclamation-triangle me-2"></i>
+                                                                        Confirmer la suppression
+                                                                    </h5>
+                                                                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Fermer"></button>
+                                                                </div>
+                                                                <div class="modal-body">
+                                                                    <div class="d-flex align-items-center mb-4">
+                                                                        <div class="flex-shrink-0 me-3">
+                                                                            <i class="fas fa-user-md text-danger fa-3x"></i>
+                                                                        </div>
+                                                                        <div>
+                                                                            <h5 class="fw-bold mb-1">Supprimer le Dr. {{ $medecin->name }} ?</h5>
+                                                                            <p class="text-muted mb-0">
+                                                                                Cette action est irréversible. Toutes les données associées à ce médecin seront définitivement supprimées.
+                                                                            </p>
+                                                                        </div>
+                                                                    </div>
+                                                                    
+                                                                    <div class="alert alert-warning" role="alert">
+                                                                        <i class="fas fa-exclamation-circle me-2"></i>
+                                                                        <strong>Attention :</strong> Cette action ne peut pas être annulée.
+                                                                    </div>
+                                                                </div>
+                                                                <div class="modal-footer bg-light">
+                                                                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">
+                                                                        <i class="fas fa-times me-2"></i>Annuler
+                                                                    </button>
+                                                                    <button type="submit" class="btn btn-danger">
+                                                                        <i class="fas fa-trash-alt me-2"></i>Supprimer définitivement
+                                                                    </button>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
                                                 </form>
                                             </div>
                                         </td>
                                     </tr>
                                     
-                                    <!-- Modal d'alerte pour chaque médecin -->
-                                    <div class="modal fade" id="alerteModal{{ $medecin->id }}" tabindex="-1">
-                                        <div class="modal-dialog">
-                                            <div class="modal-content">
-                                                <div class="modal-header">
-                                                    <h5 class="modal-title">Envoyer une alerte à {{ $medecin->name }}</h5>
-                                                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                    <!-- Modal d'alerte moderne pour chaque médecin -->
+                                    <div class="modal fade" id="alerteModal{{ $medecin->id }}" tabindex="-1" aria-hidden="true">
+                                        <div class="modal-dialog modal-dialog-centered">
+                                            <div class="modal-content border-0 shadow-lg">
+                                                <!-- En-tête avec dégradé de couleur -->
+                                                <div class="modal-header bg-gradient-primary text-white rounded-top">
+                                                    <div class="d-flex align-items-center">
+                                                        <i class="fas fa-bell me-2"></i>
+                                                        <h5 class="modal-title mb-0 fw-bold">Nouvelle alerte pour {{ $medecin->name }}</h5>
+                                                    </div>
+                                                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Fermer"></button>
                                                 </div>
-                                                <form action="{{ route('admin.medecins.alerte', $medecin->id) }}" method="POST">
+                                                
+                                                <form action="{{ route('admin.medecins.alerte', $medecin->id) }}" method="POST" class="needs-validation" novalidate>
                                                     @csrf
-                                                    <div class="modal-body">
-                                                        <div class="mb-3">
-                                                            <label for="type{{ $medecin->id }}" class="form-label">Type d'alerte</label>
-                                                            <select class="form-select" id="type{{ $medecin->id }}" name="type" required>
-                                                                <option value="info">Information</option>
-                                                                <option value="warning">Avertissement</option>
-                                                                <option value="danger">Urgent</option>
+                                                    <div class="modal-body p-4">
+                                                        <!-- Sélecteur de type d'alerte avec icônes -->
+                                                        <div class="mb-4">
+                                                            <label for="type{{ $medecin->id }}" class="form-label fw-semibold">
+                                                                <i class="fas fa-tag me-2 text-primary"></i>Type d'alerte
+                                                            </label>
+                                                            <select class="form-select form-select-lg" id="type{{ $medecin->id }}" name="type" required>
+                                                                <option value="info"><i class="fas fa-info-circle text-primary me-2"></i> Information</option>
+                                                                <option value="warning"><i class="fas fa-exclamation-triangle text-warning me-2"></i> Avertissement</option>
+                                                                <option value="danger"><i class="fas fa-exclamation-circle text-danger me-2"></i> Urgent</option>
                                                             </select>
+                                                            <div class="form-text">Sélectionnez le niveau de priorité</div>
                                                         </div>
+                                                        
+                                                        <!-- Zone de message avec compteur de caractères -->
                                                         <div class="mb-3">
-                                                            <label for="message{{ $medecin->id }}" class="form-label">Message</label>
-                                                            <textarea class="form-control" id="message{{ $medecin->id }}" 
-                                                                      name="message" rows="4" maxlength="500" 
-                                                                      placeholder="Votre message d'alerte..." required></textarea>
-                                                            <div class="form-text">Maximum 500 caractères</div>
+                                                            <label for="message{{ $medecin->id }}" class="form-label fw-semibold">
+                                                                <i class="fas fa-comment-alt me-2 text-primary"></i>Message
+                                                            </label>
+                                                            <div class="input-group">
+                                                                <textarea class="form-control form-control-lg" 
+                                                                          id="message{{ $medecin->id }}" 
+                                                                          name="message" 
+                                                                          rows="4" 
+                                                                          maxlength="500"
+                                                                          placeholder="Décrivez la raison de cette alerte..." 
+                                                                          required
+                                                                          style="resize: none;"></textarea>
+                                                            </div>
+                                                            <div class="d-flex justify-content-between mt-1">
+                                                                <small class="text-muted">Maximum 500 caractères</small>
+                                                                <small class="text-muted"><span id="charCount{{ $medecin->id }}">0</span>/500</small>
+                                                            </div>
                                                         </div>
                                                     </div>
-                                                    <div class="modal-footer">
-                                                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
-                                                        <button type="submit" class="btn btn-warning">Envoyer l'alerte</button>
-                                                    </div>
+                                                    
+                                                    <!-- Pied de page avec boutons d'action -->
+                                                    <div class="modal-footer bg-light rounded-bottom p-3">
+                                                        <button type="button" class="btn btn-outline-secondary px-4" data-bs-dismiss="modal">
+                                                            <i class="fas fa-times me-2"></i>Annuler
+                                                        </button>
+                                                        <button type="submit" class="btn btn-warning px-4 fw-bold text-white">
+                                                            <i class="fas fa-paper-plane me-2"></i>Envoyer l'alerte
+                                                        </button>
                                                 </form>
                                             </div>
                                         </div>
@@ -313,7 +494,24 @@
 </div>
 
 <style>
-.avatar-sm img {
+/* Styles pour les avatars */
+.avatar-sm {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    overflow: hidden;
+}
+
+.avatar-lg {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    overflow: hidden;
+    border: 3px solid #fff;
+    box-shadow: 0 0.25rem 0.5rem rgba(0, 0, 0, 0.1);
+}
+
+.avatar-sm img, .avatar-lg img {
     object-fit: cover;
 }
 .btn-group .btn {
@@ -326,5 +524,124 @@
 .table th {
     border-top: none;
 }
+
+/* Styles pour le modal moderne */
+.modal.fade .modal-dialog {
+    transform: translateY(-50px);
+    transition: transform 0.3s ease-out, opacity 0.2s ease-out;
+    opacity: 0;
+}
+
+.modal.show .modal-dialog {
+    transform: translateY(0);
+    opacity: 1;
+}
+
+/* Style personnalisé pour les options du select */
+select option {
+    padding: 8px 12px;
+}
+
+/* Animation du bouton d'envoi */
+.btn-send-alert {
+    position: relative;
+    overflow: hidden;
+    transition: all 0.3s;
+}
+
+.btn-send-alert:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+}
+
+.btn-send-alert:active {
+    transform: translateY(0);
+}
+
+/* Style pour le compteur de caractères */
+.char-counter {
+    transition: color 0.3s;
+}
+
+.char-counter.warning {
+    color: #ffc107;
+    font-weight: bold;
+}
+
+.char-counter.danger {
+    color: #dc3545;
+    font-weight: bold;
+}
 </style>
+
+@push('scripts')
+<script>
+    // Initialisation des tooltips Bootstrap
+    var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+    var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+        return new bootstrap.Tooltip(tooltipTriggerEl);
+    });
+    
+    // Gestion du compteur de caractères pour chaque modal
+    document.addEventListener('DOMContentLoaded', function() {
+        // Pour chaque modal d'alerte
+        document.querySelectorAll('[id^="alerteModal"]').forEach(function(modal) {
+            const modalId = modal.id;
+            const medecinId = modalId.replace('alerteModal', '');
+            const textarea = document.getElementById('message' + medecinId);
+            const charCount = document.getElementById('charCount' + medecinId);
+            
+            if (textarea && charCount) {
+                // Mise à jour initiale
+                updateCharCount(textarea, charCount);
+                
+                // Écouter les changements
+                textarea.addEventListener('input', function() {
+                    updateCharCount(this, charCount);
+                });
+            }
+            
+            // Gestion de la soumission du formulaire
+            const form = modal.querySelector('form');
+            if (form) {
+                form.addEventListener('submit', function(e) {
+                    if (!form.checkValidity()) {
+                        e.preventDefault();
+                        e.stopPropagation();
+                    }
+                    form.classList.add('was-validated');
+                });
+            }
+        });
+        
+        // Fonction pour mettre à jour le compteur de caractères
+        function updateCharCount(textarea, counterElement) {
+            const currentLength = textarea.value.length;
+            const maxLength = textarea.getAttribute('maxlength');
+            
+            counterElement.textContent = currentLength;
+            counterElement.className = 'char-counter';
+            
+            // Changer la couleur en fonction du nombre de caractères restants
+            const remaining = maxLength - currentLength;
+            if (remaining < 50) {
+                counterElement.classList.add(remaining < 20 ? 'danger' : 'warning');
+            }
+        }
+        
+        // Animation personnalisée pour l'ouverture du modal
+        document.querySelectorAll('.modal').forEach(function(modal) {
+            modal.addEventListener('show.bs.modal', function () {
+                // Réinitialiser le formulaire à l'ouverture
+                const form = this.querySelector('form');
+                if (form) {
+                    form.classList.remove('was-validated');
+                    form.reset();
+                }
+            });
+        });
+    });
+</script>
+@endpush
+
 @endsection

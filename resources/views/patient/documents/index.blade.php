@@ -1,66 +1,151 @@
-<x-app-layout>
-    <x-slot name="header">
-        <h2 class="font-semibold text-xl text-gray-800 ">
-            {{ __('Vos Documents Médicaux') }}
-        </h2>
-    </x-slot>
+@extends('layouts.app')
 
-    <div class="py-12">
-        <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
-            <div class="bg-white   sm:rounded-lg p-6 md:p-8">
+@section('content')
+<div class="container-fluid py-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 class="h3">Mes documents médicaux</h1>
+        <a href="{{ route('patient.documents.create') }}" class="btn btn-primary">
+            <i class="fas fa-plus-circle me-1"></i> Ajouter un document
+        </a>
+    </div>
 
-                {{-- Section d'en-tête de la page --}}
-                <div class="mb-8 text-center">
-                    <h3 class="text-2xl font-bold text-gray-900 mb-2">Votre Espace Documentaire Sécurisé</h3>
-                    <p class="text-gray-600">Consultez, téléchargez et gérez vos ordonnances, résultats d'analyse et autres documents médicaux en toute confidentialité.</p>
+    @if(session('success'))
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            <i class="fas fa-check-circle me-2"></i> {{ session('success') }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    @endif
+
+    <div class="card">
+        <div class="card-body">
+            @if($documents->count() > 0)
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Type</th>
+                                <th>Titre</th>
+                                <th>Date d'ajout</th>
+                                <th>Taille</th>
+                                <th>Statut</th>
+                                <th class="text-end">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach($documents as $document)
+                                <tr>
+                                    <td>
+                                        <span class="badge bg-{{ getDocumentTypeColor($document->type_document) }}">
+                                            {{ ucfirst(str_replace('_', ' ', $document->type_document)) }}
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <a href="{{ route('patient.documents.show', $document) }}" class="text-decoration-none">
+                                            {{ $document->titre }}
+                                        </a>
+                                        @if($document->description)
+                                            <p class="small text-muted mb-0">{{ Str::limit($document->description, 50) }}</p>
+                                        @endif
+                                    </td>
+                                    <td>{{ $document->created_at->format('d/m/Y') }}</td>
+                                    <td>{{ number_format($document->taille_fichier / 1024, 1) }} Ko</td>
+                                    <td>
+                                        <span class="badge bg-{{ $document->statut === 'actif' ? 'success' : 'secondary' }}">
+                                            {{ ucfirst($document->statut) }}
+                                        </span>
+                                    </td>
+                                    <td class="text-end">
+                                        <div class="btn-group" role="group">
+                                            <a href="{{ route('patient.documents.show', $document) }}" 
+                                               class="btn btn-sm btn-outline-primary"
+                                               title="Voir les détails">
+                                                <i class="fas fa-eye"></i>
+                                            </a>
+                                            <a href="{{ route('patient.documents.download', $document) }}" 
+                                               class="btn btn-sm btn-outline-success"
+                                               title="Télécharger">
+                                                <i class="fas fa-download"></i>
+                                            </a>
+                                            <form action="{{ route('patient.documents.destroy', $document) }}" 
+                                                  method="POST" 
+                                                  class="d-inline"
+                                                  onsubmit="return confirm('Êtes-vous sûr de vouloir supprimer ce document ?')">
+                                                @csrf
+                                                @method('DELETE')
+                                                <button type="submit" class="btn btn-sm btn-outline-danger" title="Supprimer">
+                                                    <i class="fas fa-trash-alt"></i>
+                                                </button>
+                                            </form>
+                                        </div>
+                                    </td>
+                                </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
                 </div>
 
-                {{-- Grille des documents --}}
-                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    {{-- Boucle sur les documents du patient --}}
-                    @forelse ($documents as $document)
-                        <div class="bg-gray-50 border border-gray-200 rounded-lg p-4 shadow-sm hover:shadow-md transition-shadow duration-300">
-                            <div class="flex items-center mb-3">
-                                <span class="p-2 bg-blue-100 text-blue-600 rounded-full mr-3">
-                                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
-                                </span>
-                                <div>
-                                    <h4 class="font-semibold text-gray-800">{{ $document->titre }}</h4>
-                                    <p class="text-sm text-gray-500">Ajouté le {{ $document->created_at->format('d/m/Y') }}</p>
-                                </div>
-                            </div>
-                            <p class="text-gray-600 text-sm mb-4">
-                                {{ $document->description ?? 'Document médical généré automatiquement.' }}
-                            </p>
-                            <div class="flex justify-end gap-2">
-                                <a href="{{ Storage::url($document->fichier) }}" target="_blank" class="inline-block px-4 py-2 bg-indigo-600 text-white font-semibold text-sm rounded-lg shadow-sm hover:bg-indigo-700 transition">
-                                    Consulter
-                                </a>
-                                <a href="{{ Storage::url($document->fichier) }}" download class="inline-block px-4 py-2 bg-gray-200 text-gray-800 font-semibold text-sm rounded-lg hover:bg-gray-300 transition">
-                                    Télécharger
-                                </a>
-                            </div>
-                        </div>
-                    @empty
-                    <div class="col-span-1 md:col-span-2 lg:col-span-3 text-center py-10 px-6 bg-gray-50 rounded-lg">
-                        <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
-                            <path vector-effect="non-scaling-stroke" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 13h6m-3-3v6m-9 1V7a2 2 0 012-2h6l2 2h6a2 2 0 012 2v8a2 2 0 01-2 2H5a2 2 0 01-2-2z" />
-                        </svg>
-                        <h3 class="mt-2 text-sm font-medium text-gray-900">Aucun document disponible pour le moment</h3>
-                        <p class="mt-1 text-sm text-gray-500">Vos documents médicaux apparaîtront ici dès qu'ils seront ajoutés par votre médecin.</p>
-                        <div class="mt-6">
-                            <a href="{{ route('patient.appointments.index') }}" class="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
-                                <svg class="-ml-1 mr-2 h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
-                                    <path fill-rule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clip-rule="evenodd" />
-                                </svg>
-                                Gérer mes rendez-vous
-                            </a>
-                        </div>
+                <div class="d-flex justify-content-between align-items-center mt-4">
+                    <div class="text-muted">
+                        Affichage de {{ $documents->firstItem() }} à {{ $documents->lastItem() }} sur {{ $documents->total() }} documents
                     </div>
-                    @endforelse
-
+                    <nav>
+                        {{ $documents->links() }}
+                    </nav>
                 </div>
-            </div>
+            @else
+                <div class="text-center py-5">
+                    <div class="mb-4">
+                        <i class="fas fa-folder-open fa-4x text-muted"></i>
+                    </div>
+                    <h4>Aucun document trouvé</h4>
+                    <p class="text-muted">Vous n'avez pas encore de documents dans votre espace personnel.</p>
+                    <a href="{{ route('patient.documents.create') }}" class="btn btn-primary mt-3">
+                        <i class="fas fa-plus-circle me-1"></i> Ajouter votre premier document
+                    </a>
+                </div>
+            @endif
         </div>
     </div>
-</x-app-layout>
+</div>
+
+@php
+function getDocumentTypeColor($type) {
+    switch($type) {
+        case 'ordonnance':
+            return 'info';
+        case 'analyse':
+            return 'primary';
+        case 'compte_rendu':
+            return 'warning';
+        case 'certificat':
+            return 'success';
+        default:
+            return 'secondary';
+    }
+}
+@endphp
+
+<style>
+    .card {
+        border: none;
+        box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+    }
+    .table th {
+        font-weight: 600;
+        text-transform: uppercase;
+        font-size: 0.75rem;
+        letter-spacing: 0.5px;
+    }
+    .badge {
+        font-weight: 500;
+        padding: 0.4em 0.8em;
+    }
+    .btn-group .btn {
+        border-radius: 0.25rem !important;
+        margin-right: 0.25rem;
+    }
+    .btn-group .btn:last-child {
+        margin-right: 0;
+    }
+</style>
+@endsection

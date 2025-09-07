@@ -29,7 +29,7 @@
             <!-- Page Heading -->
             @if (isset($header))
                 <header class="bg-white shadow">
-                    <div class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
+                    <div class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-3">
                         {{ $header }}
                     </div>
                 </header>
@@ -54,12 +54,11 @@
             <x-chat.community />
         @endauth
 
-        <!-- DE-IA Assistant Dermatologique - Visible uniquement pour les patients -->
-        @auth
-            @if(auth()->user()->role === 'patient')
+          <!-- ia Chat -->
+          @auth
             <x-chat.ia />
-            @endif
         @endauth
+
         @stack('scripts')
         </body>
 </html>

@@ -66,10 +66,13 @@ box-shadow:0 0 2px {{ isset($isOnline) && $isOnline ? '#22c55e' : '#ef4444' }};d
                 </a>
                 <a href="{{ route('medecin.messages.index') }}" class="nav-link text-white">
                     <i class="fas fa-comments me-2"></i>Messages
-                    
+                </a>
+                
+                <a href="{{ route('medecin.planning.index') }}" class="nav-link text-white">
+                    <i class="fas fa-calendar-plus me-2"></i>Mon Planning
                 </a>
 
-                <a href="{{ route('medecin.new-annonces.index') }}" class="btn btn-warning text-white w-100 mt-3">
+                <a href="{{ route('medecin.new-annonces.create') }}" class="btn btn-warning text-white w-100 mt-3">
                     <i class="fas fa-plus-circle me-2"></i>Nouvelle annonce
                 </a>
 

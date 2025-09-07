@@ -58,10 +58,10 @@ return [
     */
 
     'features' => [
-         Features::termsAndPrivacyPolicy(),
-         Features::profilePhotos(),
-         Features::api(),
-        //  Features::teams(['invitations' => true]),
+        Features::termsAndPrivacyPolicy(),
+        Features::profilePhotos(),
+        Features::api(),
+        // Features::teams(['invitations' => true]),
         Features::accountDeletion(),
     ],
 
@@ -77,5 +77,18 @@ return [
     */
 
     'profile_photo_disk' => 'public',
+
+    /*
+    |--------------------------------------------------------------------------
+    | Logout Behavior
+    |--------------------------------------------------------------------------
+    |
+    | This value determines if logout requests should be handled via GET or POST.
+    | If set to true, logout requests can be made via GET. Otherwise, they
+    | must be made via POST.
+    |
+    */
+
+    'logout_via_get' => true,
 
 ];

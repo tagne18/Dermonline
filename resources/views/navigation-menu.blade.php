@@ -1,10 +1,10 @@
-<nav x-data="{ open: false }" class="bg-gradient-to-r from-blue-600 via-purple-600 to-blue-800 shadow-lg border-b border-blue-500/20 backdrop-blur-sm">
+<nav x-data="{ open: false }" class="bg-gradient-to-r from-blue-800 via-purple-600 to-blue-800 shadow-lg border-b border-blue-500/20 backdrop-blur-sm">
     <!-- Primary Navigation Menu -->
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div class="max-w-8xl">
         <div class="flex justify-between h-16">
             <div class="flex">
                 <!-- Logo moderne avec animation -->
-                <div class="shrink-0 flex items-center">
+                <div class="shrink-0 flex items-center px-4">
                     <a href="{{ route('dashboard') }}" class="flex items-center space-x-3  hover:text-blue-200 transition-all duration-300 transform hover:scale-105">
                         <div class="relative">
                             <div class="w-10 h-10 bg-white/20 rounded-xl flex items-center justify-center backdrop-blur-sm border border-white/30">
@@ -16,7 +16,7 @@
                         </div>
                         <div class="flex flex-col">
                             <span class="text-xl font-bold tracking-wide">Dermonline</span>
-                            <span class="text-xs text-blue-200 opacity-80">Santé Connectée</span>
+                            <span class="text-md text-success opacity-80">Santé Connectée</span>
                         </div>
                     </a>
                 </div>
@@ -40,38 +40,38 @@
                         <span>{{ __('Rendez-vous') }}</span>
                     </x-nav-link>
 
-                    <x-nav-link href="{{ route('patient.consultations.index') }}" :active="request()->routeIs('consultation.*')"
-                                class="flex items-center space-x-2 px-4 py-2 rounded-lg transition-all duration-300 hover:bg-white/10 hover:scale-105">
-    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
-    </svg>
-    <span>{{ __('Consultations') }}</span>
-</x-nav-link>
+                        <x-nav-link href="{{ route('patient.consultations.index') }}" :active="request()->routeIs('consultation.*')"
+                                    class="flex items-center space-x-2 px-4 py-2 rounded-lg transition-all duration-300 hover:bg-white/10 hover:scale-105">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                                </svg>
+                                <span>{{ __('Consultations') }}</span>
+                        </x-nav-link>
 
-<x-nav-link href="{{ route('patient.ordonnances') }}" :active="request()->routeIs('patient.ordonnances*')"
-            class="flex items-center space-x-2 px-4 py-2 rounded-lg transition-all duration-300 hover:bg-white/10 hover:scale-105">
-    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
-    </svg>
-    <span>Ordonnances</span>
-</x-nav-link>
+                        <x-nav-link href="{{ route('patient.ordonnances.index') }}" :active="request()->routeIs('patient.ordonnances*')"
+                                    class="flex items-center space-x-2 px-4 py-2 rounded-lg transition-all duration-300 hover:bg-white/10 hover:scale-105">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                            </svg>
+                            <span>Ordonnances</span>
+                        </x-nav-link>
 
-<x-nav-link href="{{ route('patient.examens') }}" :active="request()->routeIs('patient.examens*')"
-            class="flex items-center space-x-2 px-4 py-2 rounded-lg transition-all duration-300 hover:bg-white/10 hover:scale-105">
-    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0zm6 8a9 9 0 11-18 0 9 9 0 0118 0z" />
-    </svg>
-    <span>Examens</span>
-</x-nav-link>
+                        <x-nav-link href="{{ route('patient.examens') }}" :active="request()->routeIs('patient.examens*')"
+                                    class="flex items-center space-x-2 px-4 py-2 rounded-lg transition-all duration-300 hover:bg-white/10 hover:scale-105">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0zm6 8a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                            <span>Examens</span>
+                        </x-nav-link>
 
 
-                    <x-nav-link href="{{ route('patient.documents.index') }}" :active="request()->routeIs('documents.*')"
-                                class="flex items-center space-x-2 px-4 py-2 rounded-lg transition-all duration-300 hover:bg-white/10 hover:scale-105">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
-                        </svg>
-                        <span>{{ __('Documents') }}</span>
-                    </x-nav-link>
+                        <x-nav-link href="{{ route('patient.documents.index') }}" :active="request()->routeIs('documents.*')"
+                                    class="flex items-center space-x-2 px-4 py-2 rounded-lg transition-all duration-300 hover:bg-white/10 hover:scale-105">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                            </svg>
+                            <span>{{ __('Documents') }}</span>
+                        </x-nav-link>
 
                     <x-nav-link href="{{ route('patient.messages.index') }}" :active="request()->routeIs('messages.index')"
                                 class="flex items-center space-x-2 px-4 py-2 rounded-lg transition-all duration-300 hover:bg-white/10 hover:scale-105">
@@ -343,7 +343,7 @@
                 </div>
             </div>
 
-            <div class="mt-3 space-y-1 px-4">
+            <div class="mt-3 space-y-1 ">
                 <!-- Account Management -->
                 <x-responsive-nav-link href="{{ route('profile.show') }}" :active="request()->routeIs('profile.show')"
                                       class="flex items-center space-x-3 px-4 py-3 rounded-lg transition-all duration-300 hover:bg-white/10">

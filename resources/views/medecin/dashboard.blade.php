@@ -80,7 +80,7 @@
 
         .chart-header {
             display: flex;
-            justify-content: between;
+            justify-content: space-between;
             align-items: center;
             margin-bottom: 1.5rem;
             padding-bottom: 1rem;
@@ -92,6 +92,15 @@
             font-weight: 600;
             color: #5a5c69;
             margin: 0;
+        }
+
+        .mini-chart-container {
+            background: white;
+            border-radius: 12px;
+            padding: 1rem;
+            box-shadow: 0 3px 15px rgba(0,0,0,0.05);
+            margin-bottom: 1rem;
+            height: 250px;
         }
 
         .notification-item {
@@ -169,6 +178,28 @@
             text-align: center;
         }
 
+        .stat-mini {
+            background: linear-gradient(135deg, rgba(78, 115, 223, 0.1), rgba(54, 185, 204, 0.1));
+            border-radius: 10px;
+            padding: 1rem;
+            margin-bottom: 1rem;
+            border-left: 4px solid var(--primary-color);
+        }
+
+        .metric-card {
+            background: white;
+            border-radius: 12px;
+            padding: 1.5rem;
+            box-shadow: 0 3px 15px rgba(0,0,0,0.05);
+            margin-bottom: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        .metric-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+        }
+
         @media (max-width: 768px) {
             .quick-actions {
                 flex-direction: column;
@@ -240,7 +271,7 @@
                     <div class="card-icon text-primary">
                         <i class="fas fa-users"></i>
                     </div>
-                    <div class="card-value text-primary">{{ $patientCount ?? 0 }}</div>
+                    <div class="card-value text-primary" id="patient-count">{{ $patientCount ?? 0 }}</div>
                     <div class="card-title">Patients Total</div>
                     <div class="card-change text-success">
                         <i class="fas fa-arrow-up"></i> +12% ce mois
@@ -255,10 +286,10 @@
                     <div class="card-icon text-warning">
                         <i class="fas fa-calendar-check"></i>
                     </div>
-                    <div class="card-value text-warning">{{ $pendingRdvCount ?? 0 }}</div>
+                    <div class="card-value text-warning" id="pending-rdv-count">{{ $pendingRdvCount ?? 0 }}</div>
                     <div class="card-title">RDV en attente</div>
                     <div class="card-change text-info">
-                        <i class="fas fa-clock"></i> Aujourd'hui: {{ $todayRdvCount ?? 0 }}
+                        <i class="fas fa-clock"></i> Aujourd'hui: <span id="today-rdv-count">{{ $todayRdvCount ?? 0 }}</span>
                     </div>
                 </div>
             </div>
@@ -270,7 +301,7 @@
                     <div class="card-icon text-success">
                         <i class="fas fa-user-md"></i>
                     </div>
-                    <div class="card-value text-success">{{ $consultationCount ?? 0 }}</div>
+                    <div class="card-value text-success" id="consultation-count">{{ $consultationCount ?? 0 }}</div>
                     <div class="card-title">Consultations</div>
                     <div class="card-change text-success">
                         <i class="fas fa-arrow-up"></i> +8% cette semaine
@@ -285,7 +316,7 @@
                     <div class="card-icon text-info">
                         <i class="fas fa-euro-sign"></i>
                     </div>
-                    <div class="card-value text-info">{{ number_format($revenue ?? 0) }}€</div>
+                    <div class="card-value text-info" id="revenue">{{ number_format($revenue ?? 0) }}€</div>
                     <div class="card-title">Revenus du mois</div>
                     <div class="card-change text-success">
                         <i class="fas fa-chart-line"></i> +15% vs mois dernier
@@ -296,7 +327,7 @@
     </div>
 
     <div class="row g-4">
-        <!-- Graphiques -->
+        <!-- Section graphiques principale -->
         <div class="col-xl-8">
             <!-- Graphique des consultations -->
             <div class="chart-container">
@@ -314,17 +345,76 @@
                 <canvas id="consultationChart" height="300"></canvas>
             </div>
 
-            <!-- Répartition des patients par âge -->
+            <!-- Graphiques revenus et types de consultations -->
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="chart-container">
+                        <div class="chart-header">
+                            <h6 class="chart-title"><i class="fas fa-euro-sign me-2"></i>Revenus mensuels</h6>
+                        </div>
+                        <canvas id="revenueChart"></canvas>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="chart-container">
+                        <div class="chart-header">
+                            <h6 class="chart-title"><i class="fas fa-stethoscope me-2"></i>Types de consultations</h6>
+                        </div>
+                        <canvas id="consultationTypeChart"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Répartition des patients par âge et sexe -->
             <div class="chart-container">
                 <div class="chart-header">
-                    <h5 class="chart-title"><i class="fas fa-users me-2"></i>Répartition des patients par âge</h5>
+                    <h5 class="chart-title"><i class="fas fa-users me-2"></i>Analyse démographique des patients</h5>
                 </div>
                 <div class="row">
                     <div class="col-md-6">
+                        <h6 class="text-center mb-3">Répartition par âge</h6>
                         <canvas id="ageChart"></canvas>
                     </div>
                     <div class="col-md-6">
+                        <h6 class="text-center mb-3">Répartition par sexe</h6>
                         <canvas id="genderChart"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Nouveaux graphiques -->
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="chart-container">
+                        <div class="chart-header">
+                            <h6 class="chart-title"><i class="fas fa-calendar-week me-2"></i>RDV par jour de la semaine</h6>
+                        </div>
+                        <canvas id="weeklyAppointmentChart"></canvas>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="chart-container">
+                        <div class="chart-header">
+                            <h6 class="chart-title"><i class="fas fa-pills me-2"></i>Prescriptions par catégorie</h6>
+                        </div>
+                        <canvas id="prescriptionChart"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Graphique de satisfaction et temps d'attente -->
+            <div class="chart-container">
+                <div class="chart-header">
+                    <h5 class="chart-title"><i class="fas fa-chart-bar me-2"></i>Métriques de performance</h5>
+                </div>
+                <div class="row">
+                    <div class="col-md-6">
+                        <h6 class="text-center mb-3">Satisfaction patients (sur 5)</h6>
+                        <canvas id="satisfactionChart"></canvas>
+                    </div>
+                    <div class="col-md-6">
+                        <h6 class="text-center mb-3">Temps d'attente moyen (min)</h6>
+                        <canvas id="waitTimeChart"></canvas>
                     </div>
                 </div>
             </div>
@@ -344,36 +434,109 @@
                 <small>Heure locale</small>
             </div>
 
+            <!-- Métriques rapides -->
+             
+            <div class="metric-card mt-4">
+                <h6><i class="fas fa-chart-pie me-2"></i>Indicateurs clés</h6>
+                <div class="stat-mini">
+                    <div class="d-flex justify-content-between">
+                        <span>Taux d'occupation</span>
+                        <strong class="text-success">87%</strong>
+                    </div>
+                </div>
+                <div class="stat-mini">
+                    <div class="d-flex justify-content-between">
+                        <span>Nouveaux patients</span>
+                        <strong class="text-info">+23</strong>
+                    </div>
+                </div>
+                <div class="stat-mini">
+                    <div class="d-flex justify-content-between">
+                        <span>Annulations</span>
+                        <strong class="text-warning">3%</strong>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Mini graphique - Évolution hebdomadaire -->
+            <div class="mini-chart-container">
+                <h6><i class="fas fa-trending-up me-2"></i>Évolution cette semaine</h6>
+                <canvas id="weeklyTrendChart"></canvas>
+            </div>
+
             <!-- Prochains rendez-vous -->
-            <div class="card border-0 shadow mt-4">
+            <div class="card border-0 shadow">
                 <div class="card-header bg-transparent border-0">
                     <h6 class="card-title mb-0">
                         <i class="fas fa-calendar-alt me-2"></i>Prochains rendez-vous
                     </h6>
                 </div>
                 <div class="card-body">
-                    @forelse($upcomingAppointments ?? [] as $rdv)
-                        <div class="appointment-card card priority-{{ $rdv->priority ?? 'low' }}">
+                    @if(count($upcomingAppointments) > 0)
+                        @foreach($upcomingAppointments as $rdv)
+                            <div class="appointment-card card priority-{{ $rdv['priority'] ?? 'low' }}">
+                                <div class="card-body py-2 px-3">
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <div>
+                                            <h6 class="mb-0">{{ $rdv['patient_name'] ?? 'Patient' }}</h6>
+                                            <small class="text-muted">
+                                                <i class="fas fa-clock me-1"></i>{{ $rdv['time'] ?? '00:00' }}
+                                            </small>
+                                        </div>
+                                        <div class="text-end">
+                                            <span class="badge bg-primary">{{ $rdv['type'] ?? 'Consultation' }}</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        @endforeach
+                    @else
+                        <div class="appointment-card card priority-high">
                             <div class="card-body py-2 px-3">
                                 <div class="d-flex justify-content-between align-items-center">
                                     <div>
-                                        <h6 class="mb-0">{{ $rdv->patient_name ?? 'Patient' }}</h6>
+                                        <h6 class="mb-0">Dr. Mballa Jean</h6>
                                         <small class="text-muted">
-                                            <i class="fas fa-clock me-1"></i>{{ $rdv->time ?? '00:00' }}
+                                            <i class="fas fa-clock me-1"></i>09:00
                                         </small>
                                     </div>
                                     <div class="text-end">
-                                        <span class="badge bg-primary">{{ $rdv->type ?? 'Consultation' }}</span>
+                                        <span class="badge bg-danger">Urgent</span>
                                     </div>
                                 </div>
                             </div>
                         </div>
-                    @empty
-                        <p class="text-muted text-center py-3">
-                            <i class="fas fa-calendar-times fa-2x mb-2 d-block"></i>
-                            Aucun rendez-vous programmé
-                        </p>
-                    @endforelse
+                        <div class="appointment-card card priority-medium">
+                            <div class="card-body py-2 px-3">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <h6 class="mb-0">Mme Nkomo Marie</h6>
+                                        <small class="text-muted">
+                                            <i class="fas fa-clock me-1"></i>10:30
+                                        </small>
+                                    </div>
+                                    <div class="text-end">
+                                        <span class="badge bg-primary">Consultation</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="appointment-card card priority-low">
+                            <div class="card-body py-2 px-3">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <h6 class="mb-0">M. Atangana Paul</h6>
+                                        <small class="text-muted">
+                                            <i class="fas fa-clock me-1"></i>14:00
+                                        </small>
+                                    </div>
+                                    <div class="text-end">
+                                        <span class="badge bg-success">Suivi</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    @endif
                 </div>
             </div>
 
@@ -385,23 +548,52 @@
                     </h6>
                 </div>
                 <div class="card-body">
-                    @forelse($notifications ?? [] as $notif)
+                    @forelse($notifications as $notif)
                         <div class="notification-item p-3 mb-2">
                             <div class="d-flex align-items-start">
                                 <i class="fas fa-info-circle text-primary me-2 mt-1"></i>
                                 <div class="flex-grow-1">
-                                    <p class="mb-1 small">{{ $notif->message }}</p>
+                                    <p class="mb-1 small">{{ $notif['message'] }}</p>
                                     <small class="text-muted">
-                                        <i class="fas fa-clock me-1"></i>{{ $notif->created_at->diffForHumans() }}
+                                        <i class="fas fa-clock me-1"></i>{{ $notif['created_at'] }}
                                     </small>
                                 </div>
                             </div>
                         </div>
                     @empty
-                        <p class="text-muted text-center py-3">
-                            <i class="fas fa-bell-slash fa-2x mb-2 d-block"></i>
-                            Aucune nouvelle notification
-                        </p>
+                        <div class="notification-item p-3 mb-2">
+                            <div class="d-flex align-items-start">
+                                <i class="fas fa-user-plus text-success me-2 mt-1"></i>
+                                <div class="flex-grow-1">
+                                    <p class="mb-1 small">Nouveau patient enregistré : Mme Kouam Diane</p>
+                                    <small class="text-muted">
+                                        <i class="fas fa-clock me-1"></i>Il y a 5 minutes
+                                    </small>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="notification-item p-3 mb-2">
+                            <div class="d-flex align-items-start">
+                                <i class="fas fa-calendar-times text-warning me-2 mt-1"></i>
+                                <div class="flex-grow-1">
+                                    <p class="mb-1 small">RDV annulé - M. Biyong à 15h30</p>
+                                    <small class="text-muted">
+                                        <i class="fas fa-clock me-1"></i>Il y a 1 heure
+                                    </small>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="notification-item p-3 mb-2">
+                            <div class="d-flex align-items-start">
+                                <i class="fas fa-prescription text-info me-2 mt-1"></i>
+                                <div class="flex-grow-1">
+                                    <p class="mb-1 small">Ordonnance validée pour M. Essama</p>
+                                    <small class="text-muted">
+                                        <i class="fas fa-clock me-1"></i>Il y a 2 heures
+                                    </small>
+                                </div>
+                            </div>
+                        </div>
                     @endforelse
                 </div>
             </div>
@@ -431,69 +623,133 @@
                         </tr>
                     </thead>
                     <tbody>
-                        @forelse($recentPatients ?? [] as $patient)
+                        @if(isset($upcomingAppointments) && $upcomingAppointments->count() > 0)
+                            @foreach($upcomingAppointments as $appointment)
+                                @php
+                                    $patient = $appointment->patient ?? null;
+                                @endphp
+                                @if($patient)
+                                    <tr>
+                                        <td>
+                                            <div class="d-flex align-items-center">
+                                                <div class="avatar bg-primary text-white rounded-circle me-2 d-flex align-items-center justify-content-center" style="width: 35px; height: 35px;">
+                                                    {{ strtoupper(substr($patient->name[0] ?? 'P', 0, 1)) }}
+                                                </div>
+                                                <div>
+                                                    <h6 class="mb-0">{{ $patient->name ?? 'N/A' }}</h6>
+                                                    <small class="text-muted">{{ $patient->email ?? 'N/A' }}</small>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td>{{ $patient->birth_date ? \Carbon\Carbon::parse($patient->birth_date)->age . ' ans' : 'N/A' }}</td>
+                                        <td>{{ $appointment->date_rdv ? \Carbon\Carbon::parse($appointment->date_rdv)->diffForHumans() : 'Jamais' }}</td>
+                                        <td>
+                                            <span class="badge bg-{{ $appointment->statut === 'confirme' ? 'success' : ($appointment->statut === 'en_attente' ? 'warning' : 'secondary') }}">
+                                                {{ ucfirst(str_replace('_', ' ', $appointment->statut)) }}
+                                            </span>
+                                        </td>
+                                        <td>
+                                            <div class="btn-group btn-group-sm">
+                                                <a href="#" class="btn btn-outline-primary" title="Voir" data-bs-toggle="modal" data-bs-target="#patientDetailsModal" data-patient-id="{{ $patient->id }}">
+                                                    <i class="fas fa-eye"></i>
+                                                </a>
+                                                <a href="#" class="btn btn-outline-secondary" title="Modifier">
+                                                    <i class="fas fa-edit"></i>
+                                                </a>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                @endif
+                            @endforeach
+                        @else
                             <tr>
-                                <td>
-                                    <div class="d-flex align-items-center">
-                                        <div class="avatar bg-primary text-white rounded-circle me-2 d-flex align-items-center justify-content-center" style="width: 35px; height: 35px;">
-                                            {{ strtoupper(substr($patient->nom ?? 'P', 0, 1)) }}
-                                        </div>
-                                        <div>
-                                            <h6 class="mb-0">{{ $patient->nom ?? 'N/A' }} {{ $patient->prenom ?? '' }}</h6>
-                                            <small class="text-muted">{{ $patient->email ?? 'N/A' }}</small>
-                                        </div>
-                                    </div>
-                                </td>
-                                <td>{{ $patient->age ?? 'N/A' }} ans</td>
-                                <td>{{ $patient->last_visit ?? 'Jamais' }}</td>
-                                <td>
-                                    <span class="badge bg-{{ $patient->status === 'active' ? 'success' : 'secondary' }}">
-                                        {{ $patient->status === 'active' ? 'Actif' : 'Inactif' }}
-                                    </span>
-                                </td>
-                                <td>
-                                    <div class="btn-group btn-group-sm">
-                                        <a href="/patients/{{ $patient->id ?? '#' }}" class="btn btn-outline-primary" title="Voir">
-                                            <i class="fas fa-eye"></i>
-                                        </a>
-                                        <a href="/patients/{{ $patient->id ?? '#' }}/edit" class="btn btn-outline-secondary" title="Modifier">
-                                            <i class="fas fa-edit"></i>
-                                        </a>
+                                <td colspan="5" class="text-center py-4">
+                                    <div class="text-muted">
+                                        <i class="fas fa-users-slash fa-2x mb-2"></i>
+                                        <p class="mb-0">Aucun patient récent</p>
                                     </div>
                                 </td>
                             </tr>
-                        @empty
-                            <tr>
-                                <td colspan="5" class="text-center py-4 text-muted">
-                                    <i class="fas fa-user-slash fa-2x mb-2 d-block"></i>
-                                    Aucun patient enregistré
-                                </td>
-                            </tr>
-                        @endforelse
+                        @endif
                     </tbody>
                 </table>
             </div>
         </div>
     </div>
+
+    <!-- Alertes système -->
+    <div class="row mt-4">
+        <div class="col-md-6">
+            <div class="card border-0 shadow">
+                <div class="card-header bg-transparent border-0">
+                    <h6 class="card-title mb-0">
+                        <i class="fas fa-exclamation-triangle text-warning me-2"></i>Alertes système
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <div class="alert alert-warning d-flex align-items-center" role="alert">
+                        <i class="fas fa-server me-2"></i>
+                        <div>
+                            Sauvegarde automatique programmée à 2h00
+                        </div>
+                    </div>
+                    <div class="alert alert-info d-flex align-items-center" role="alert">
+                        <i class="fas fa-update me-2"></i>
+                        <div>
+                            Mise à jour du système disponible
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="card border-0 shadow">
+                <div class="card-header bg-transparent border-0">
+                    <h6 class="card-title mb-0">
+                        <i class="fas fa-tasks text-primary me-2"></i>Tâches à effectuer
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <span class="small">Validation des prescriptions</span>
+                        <span class="badge bg-danger">3</span>
+                    </div>
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <span class="small">Rapports médicaux à signer</span>
+                        <span class="badge bg-warning">7</span>
+                    </div>
+                    <div class="d-flex justify-content-between align-items-center">
+                        <span class="small">Réponses aux messages</span>
+                        <span class="badge bg-info">12</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
 
-@push('scripts')
 <script>
-// Mise à jour de l'heure
+// Mise à jour de l'heure en temps réel
 function updateTime() {
     const now = new Date();
-    document.getElementById('currentTime').textContent = now.toLocaleTimeString('fr-FR');
+    const timeString = now.toLocaleTimeString('fr-FR', {
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit'
+    });
+    document.getElementById('currentTime').textContent = timeString;
 }
+
 setInterval(updateTime, 1000);
 updateTime();
 
-// Données pour les graphiques (à remplacer par de vraies données depuis le contrôleur)
+// Données pour les graphiques
 const consultationData = {
-    labels: ['Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam', 'Dim'],
+    labels: @json($chartData['consultation']['labels'] ?? []),
     datasets: [{
         label: 'Consultations',
-        data: [12, 19, 8, 15, 22, 8, 5],
-        borderColor: '#4e73df',
+        data: @json($chartData['consultation']['data'] ?? []),
+        borderColor: 'rgba(78, 115, 223, 1)',
         backgroundColor: 'rgba(78, 115, 223, 0.1)',
         borderWidth: 3,
         fill: true,
@@ -501,96 +757,372 @@ const consultationData = {
     }]
 };
 
-const ageData = {
-    labels: ['0-18', '19-35', '36-50', '51-65', '+65'],
+const revenueData = {
+    labels: @json($chartData['revenue']['labels'] ?? []),
     datasets: [{
-        data: [15, 25, 30, 20, 10],
-        backgroundColor: ['#4e73df', '#1cc88a', '#f6c23e', '#e74a3b', '#858796']
+        label: 'Revenus (€)',
+        data: @json($chartData['revenue']['data'] ?? []),
+        borderColor: 'rgba(28, 200, 138, 1)',
+        backgroundColor: 'rgba(28, 200, 138, 0.1)',
+        borderWidth: 2,
+        fill: true
+    }]
+};
+
+const consultationTypeData = {
+    labels: @json($chartData['consultationTypes']['labels'] ?? []),
+    datasets: [{
+        data: @json($chartData['consultationTypes']['data'] ?? []),
+        backgroundColor: [
+            'rgba(78, 115, 223, 0.8)',
+            'rgba(231, 74, 59, 0.8)',
+            'rgba(246, 194, 62, 0.8)',
+            'rgba(54, 185, 204, 0.8)'
+        ]
+    }]
+};
+
+const ageData = {
+    labels: @json($chartData['demographics']['age']['labels'] ?? []),
+    datasets: [{
+        data: @json($chartData['demographics']['age']['data'] ?? []),
+        backgroundColor: [
+            'rgba(78, 115, 223, 0.8)',
+            'rgba(28, 200, 138, 0.8)',
+            'rgba(246, 194, 62, 0.8)',
+            'rgba(231, 74, 59, 0.8)',
+            'rgba(133, 135, 150, 0.8)'
+        ]
     }]
 };
 
 const genderData = {
-    labels: ['Hommes', 'Femmes'],
+    labels: @json($chartData['demographics']['gender']['labels'] ?? []),
     datasets: [{
-        data: [45, 55],
-        backgroundColor: ['#36b9cc', '#fd79a8']
+        data: @json($chartData['demographics']['gender']['data'] ?? []),
+        backgroundColor: [
+            'rgba(54, 185, 204, 0.8)',
+            'rgba(246, 194, 62, 0.8)'
+        ]
     }]
 };
 
-// Configuration des graphiques
-const chartConfig = {
+const weeklyAppointmentData = {
+    labels: @json($chartData['weeklyAppointments']['labels'] ?? []),
+    datasets: [{
+        label: 'Rendez-vous',
+        data: @json($chartData['weeklyAppointments']['data'] ?? []),
+        backgroundColor: 'rgba(78, 115, 223, 0.6)',
+        borderColor: 'rgba(78, 115, 223, 1)',
+        borderWidth: 1
+    }]
+};
+
+const prescriptionData = {
+    labels: @json($chartData['prescriptions']['labels'] ?? []),
+    datasets: [{
+        data: @json($chartData['prescriptions']['data'] ?? []),
+        backgroundColor: [
+            'rgba(231, 74, 59, 0.8)',
+            'rgba(246, 194, 62, 0.8)',
+            'rgba(28, 200, 138, 0.8)',
+            'rgba(54, 185, 204, 0.8)',
+            'rgba(133, 135, 150, 0.8)'
+        ]
+    }]
+};
+
+// Configuration commune pour les graphiques
+const commonOptions = {
     responsive: true,
     maintainAspectRatio: false,
     plugins: {
         legend: {
-            position: 'bottom'
+            display: false
+        }
+    },
+    scales: {
+        x: {
+            grid: {
+                display: false
+            }
+        },
+        y: {
+            grid: {
+                color: 'rgba(0,0,0,0.05)'
+            }
         }
     }
 };
 
 // Initialisation des graphiques
-const consultationChart = new Chart(document.getElementById('consultationChart'), {
-    type: 'line',
-    data: consultationData,
-    options: {
-        ...chartConfig,
-        scales: {
-            y: {
-                beginAtZero: true,
-                grid: {
-                    color: 'rgba(0,0,0,0.1)'
-                }
+document.addEventListener('DOMContentLoaded', function() {
+    // Graphique principal des consultations
+    const consultationChart = new Chart(document.getElementById('consultationChart'), {
+        type: 'line',
+        data: consultationData,
+        options: {
+            ...commonOptions,
+            plugins: {
+                legend: { display: true }
             },
-            x: {
-                grid: {
-                    display: false
+            scales: {
+                ...commonOptions.scales,
+                y: {
+                    ...commonOptions.scales.y,
+                    beginAtZero: true
                 }
             }
         }
-    }
-});
+    });
 
-const ageChart = new Chart(document.getElementById('ageChart'), {
-    type: 'doughnut',
-    data: ageData,
-    options: chartConfig
-});
+    // Graphique des revenus
+    new Chart(document.getElementById('revenueChart'), {
+        type: 'bar',
+        data: revenueData,
+        options: commonOptions
+    });
 
-const genderChart = new Chart(document.getElementById('genderChart'), {
-    type: 'pie',
-    data: genderData,
-    options: chartConfig
+    // Graphique des types de consultations
+    new Chart(document.getElementById('consultationTypeChart'), {
+        type: 'doughnut',
+        data: consultationTypeData,
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: 'bottom'
+                }
+            }
+        }
+    });
+
+    // Graphique des âges
+    new Chart(document.getElementById('ageChart'), {
+        type: 'pie',
+        data: ageData,
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: 'bottom'
+                }
+            }
+        }
+    });
+
+    // Graphique des sexes
+    new Chart(document.getElementById('genderChart'), {
+        type: 'doughnut',
+        data: genderData,
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: 'bottom'
+                }
+            }
+        }
+    });
+
+    // Graphique RDV hebdomadaires
+    new Chart(document.getElementById('weeklyAppointmentChart'), {
+        type: 'bar',
+        data: weeklyAppointmentData,
+        options: commonOptions
+    });
+
+    // Graphique des prescriptions
+    new Chart(document.getElementById('prescriptionChart'), {
+        type: 'doughnut',
+        data: prescriptionData,
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: 'bottom'
+                }
+            }
+        }
+    });
+
+    // Graphique de satisfaction
+    new Chart(document.getElementById('satisfactionChart'), {
+        type: 'bar',
+        data: satisfactionData,
+        options: {
+            ...commonOptions,
+            scales: {
+                ...commonOptions.scales,
+                y: {
+                    ...commonOptions.scales.y,
+                    min: 0,
+                    max: 5
+                }
+            }
+        }
+    });
+
+    // Graphique du temps d'attente
+    new Chart(document.getElementById('waitTimeChart'), {
+        type: 'line',
+        data: waitTimeData,
+        options: {
+            ...commonOptions,
+            scales: {
+                ...commonOptions.scales,
+                y: {
+                    ...commonOptions.scales.y,
+                    beginAtZero: true
+                }
+            }
+        }
+    });
+
+    // Mini graphique de tendance
+    new Chart(document.getElementById('weeklyTrendChart'), {
+        type: 'line',
+        data: weeklyTrendData,
+        options: {
+            ...commonOptions,
+            elements: {
+                point: {
+                    radius: 3
+                }
+            }
+        }
+    });
+
+    // Gestion des boutons de période pour le graphique principal
+    document.querySelectorAll('input[name="consultationPeriod"]').forEach(radio => {
+        radio.addEventListener('change', function() {
+            // Ici vous pouvez ajouter la logique pour changer les données selon la période
+            console.log('Période changée:', this.id);
+        });
+    });
 });
 
 // Fonction pour mettre à jour la période
 function updatePeriod(period) {
-    // Ici vous pouvez ajouter la logique pour actualiser les données selon la période
-    console.log('Période sélectionnée:', period);
-    // Faire un appel AJAX pour récupérer les nouvelles données
+    // Afficher un indicateur de chargement
+    const loadingIndicator = document.getElementById('period-loading');
+    loadingIndicator.classList.remove('d-none');
+    
+    // Désactiver les boutons pendant le chargement
+    document.querySelectorAll('input[name="consultationPeriod"]').forEach(radio => {
+        radio.disabled = true;
+    });
+    
+    // Envoyer une requête pour récupérer les données mises à jour
+    fetch(`/api/dashboard/update-period?period=${period}`, {
+        headers: {
+            'X-Requested-With': 'XMLHttpRequest',
+            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        // Mettre à jour les graphiques avec les nouvelles données
+        updateCharts(data);
+        
+        // Mettre à jour les compteurs
+        if (data.stats) {
+            document.getElementById('patient-count').textContent = data.stats.patientCount || 0;
+            document.getElementById('today-rdv-count').textContent = data.stats.todayRdvCount || 0;
+            document.getElementById('pending-rdv-count').textContent = data.stats.pendingRdvCount || 0;
+            document.getElementById('consultation-count').textContent = data.stats.consultationCount || 0;
+            document.getElementById('revenue').textContent = (data.stats.revenue || 0).toLocaleString() + '€';
+        }
+    })
+    .catch(error => {
+        console.error('Erreur lors de la mise à jour de la période:', error);
+        // Afficher un message d'erreur à l'utilisateur
+        alert('Une erreur est survenue lors de la mise à jour des données. Veuillez réessayer.');
+    })
+    .finally(() => {
+        // Cacher l'indicateur de chargement et réactiver les boutons
+        loadingIndicator.classList.add('d-none');
+        document.querySelectorAll('input[name="consultationPeriod"]').forEach(radio => {
+            radio.disabled = false;
+        });
+    });
 }
 
-// Animation au scroll
-const observerOptions = {
-    threshold: 0.1,
-    rootMargin: '0px 0px -50px 0px'
-};
+// Fonction pour mettre à jour les graphiques avec de nouvelles données
+function updateCharts(data) {
+    // Mettre à jour chaque graphique avec les nouvelles données
+    if (data.consultation) {
+        consultationChart.data.labels = data.consultation.labels;
+        consultationChart.data.datasets[0].data = data.consultation.data;
+        consultationChart.update();
+    }
+    
+    if (data.revenue) {
+        revenueChart.data.labels = data.revenue.labels;
+        revenueChart.data.datasets[0].data = data.revenue.data;
+        revenueChart.update();
+    }
+    
+    // Ajouter des mises à jour pour les autres graphiques selon les besoins
+}
 
-const observer = new IntersectionObserver((entries) => {
-    entries.forEach(entry => {
-        if (entry.isIntersecting) {
-            entry.target.style.opacity = '1';
-            entry.target.style.transform = 'translateY(0)';
+// Fonction pour rafraîchir les données du tableau de bord
+function refreshDashboard() {
+    fetch('/api/dashboard/data', {
+        headers: {
+            'X-Requested-With': 'XMLHttpRequest',
+            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
         }
+    })
+    .then(response => response.json())
+    .then(data => {
+        // Mettre à jour les compteurs
+        document.getElementById('patient-count').textContent = data.patientCount || 0;
+        document.getElementById('today-rdv-count').textContent = data.todayRdvCount || 0;
+        document.getElementById('pending-rdv-count').textContent = data.pendingRdvCount || 0;
+        document.getElementById('consultation-count').textContent = data.consultationCount || 0;
+        document.getElementById('revenue').textContent = (data.revenue || 0).toLocaleString() + '€';
+        
+        // Mettre à jour la liste des patients récents
+        const patientsList = document.getElementById('recent-patients-list');
+        if (patientsList && data.recentPatients) {
+            // Implémentez la logique pour mettre à jour la liste des patients
+        }
+    })
+    .catch(error => {
+        console.error('Erreur lors du rafraîchissement du tableau de bord:', error);
     });
-}, observerOptions);
+}
 
-// Observer tous les éléments à animer
-document.querySelectorAll('.stat-card, .chart-container, .card').forEach(el => {
-    el.style.opacity = '0';
-    el.style.transform = 'translateY(20px)';
-    el.style.transition = 'all 0.6s ease';
-    observer.observe(el);
+// Rafraîchir les données toutes les 5 minutes
+setInterval(refreshDashboard, 5 * 60 * 1000);
+
+// Initialisation du tableau de bord
+document.addEventListener('DOMContentLoaded', function() {
+    // Animation des cartes au survol
+    const cards = document.querySelectorAll('.stat-card');
+    cards.forEach(card => {
+        card.addEventListener('mouseenter', function() {
+            this.style.transform = 'translateY(-8px)';
+        });
+        
+        card.addEventListener('mouseleave', function() {
+            this.style.transform = 'translateY(0)';
+        });
+    });
+    
+    // Initialiser les tooltips Bootstrap
+    const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+    tooltipTriggerList.map(function (tooltipTriggerEl) {
+        return new bootstrap.Tooltip(tooltipTriggerEl);
+    });
+    
+    // Charger les données initiales
+    refreshDashboard();
 });
 </script>
-@endpush
 @endsection

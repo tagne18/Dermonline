@@ -47,7 +47,7 @@ function initiateNoupiaPayment()
     	// (string) [required] Item reference e.g SCHOOL FEES			 
     	'reference'     => 'YOUR_ITEM_REFERENCE_HERE',   
     	// (int) [required] Item cost
-        'amount' 		=> 100, 	
+        'amount' 		=> 1000, 	
         // (int) [required] Mobile Money account number. No phone code.					 
         'phone' 		=> 671234567, 	
         // (string) [required] Payment method: mobilemoney, noupia, invoice or withdraw.

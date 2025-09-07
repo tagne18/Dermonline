@@ -19,9 +19,10 @@
     <style>
         /* Styles personnalisés pour le menu de navigation */
         .main-content {
-            margin-left: 16rem;
-            width: calc(100% - 16rem);
+            margin-left: 20rem;
+            width: calc(100% - 20rem);
             transition: all 0.3s;
+          
         }
         
         @media (max-width: 1199.98px) {

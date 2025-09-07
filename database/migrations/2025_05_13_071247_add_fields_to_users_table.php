@@ -20,6 +20,7 @@ return new class extends Migration
             $table->string('profession')->nullable();
             $table->string('city')->nullable();
             $table->enum('gender', ['homme', 'femme'])->nullable();
+            $table->string('langue', 10)->default('fr');
         });
 
     }

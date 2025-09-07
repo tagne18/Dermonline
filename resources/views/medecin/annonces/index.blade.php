@@ -361,9 +361,9 @@
             </div>
         @endif
         
-        <div class="stats-info">
+        <!-- <div class="stats-info">
             <strong>Information :</strong> {{ $appointments->count() }} rendez-vous trouvés pour le médecin ID: {{ auth()->id() }}
-        </div>
+        </div> -->
 
         <!-- Barre de recherche et filtres -->
         <div class="card border-0 shadow-sm mb-4">
@@ -627,7 +627,7 @@ function confirmAction(button, message) {
     if (!confirm(message)) {
         return false;
     }
-    showLoading(button);
+    // Ne pas appeler showLoading ici, laisser le formulaire se soumettre
     return true;
 }
 
@@ -663,6 +663,7 @@ document.querySelectorAll('form').forEach(form => {
             e.preventDefault();
             return false;
         }
+        // Appeler showLoading APRÈS la soumission
         showLoading(submitButton);
     });
 });

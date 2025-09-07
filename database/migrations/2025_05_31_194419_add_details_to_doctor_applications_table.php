@@ -12,37 +12,56 @@ return new class extends Migration
     public function up()
     {
         Schema::table('doctor_applications', function (Blueprint $table) {
-            $table->string('specialite')->nullable();
-            $table->string('ville')->nullable();
-            $table->enum('langue', ['fr', 'en'])->nullable();
-            $table->string('lieu_travail')->nullable();
-            $table->string('matricule_professionnel')->nullable();
-            $table->string('numero_licence')->nullable();
-            $table->text('experience')->nullable();
-            $table->string('expertise')->nullable();
+            if (!Schema::hasColumn('doctor_applications', 'specialite')) {
+                $table->string('specialite')->nullable();
+            }
+            if (!Schema::hasColumn('doctor_applications', 'ville')) {
+                $table->string('ville')->nullable();
+            }
+            if (!Schema::hasColumn('doctor_applications', 'langue')) {
+                $table->enum('langue', ['fr', 'en'])->default('fr');
+            } else {
+                // Mettre à jour le type de la colonne si elle existe déjà
+                $table->enum('langue', ['fr', 'en'])->default('fr')->change();
+            }
+            if (!Schema::hasColumn('doctor_applications', 'lieu_travail')) {
+                $table->string('lieu_travail')->nullable();
+            }
+            if (!Schema::hasColumn('doctor_applications', 'matricule_professionnel')) {
+                $table->string('matricule_professionnel')->nullable();
+            }
+            if (!Schema::hasColumn('doctor_applications', 'numero_licence')) {
+                $table->string('numero_licence')->nullable();
+            }
+            if (!Schema::hasColumn('doctor_applications', 'experience')) {
+                $table->text('experience')->nullable();
+            }
+            if (!Schema::hasColumn('doctor_applications', 'expertise')) {
+                $table->string('expertise')->nullable();
+            }
         });
     }
 
     public function down()
     {
-        Schema::create('doctor_applications', function (Blueprint $table) {
-            $table->id();
-            $table->string('name');
-            $table->string('email')->unique();
-            $table->string('phone')->nullable();
-            $table->string('specialite');
-            $table->string('ville');
-            $table->string('langue');
-            $table->string('lieu_travail')->nullable();
-            $table->string('matricule_professionnel')->nullable();
-            $table->string('numero_licence')->nullable();
-            $table->text('experience')->nullable();
-            $table->string('expertise')->nullable();
-            $table->text('cv')->nullable();
-            $table->timestamps();
+        Schema::table('doctor_applications', function (Blueprint $table) {
+            $columns = [
+                'specialite',
+                'ville',
+                'langue',
+                'lieu_travail',
+                'matricule_professionnel',
+                'numero_licence',
+                'experience',
+                'expertise'
+            ];
+            
+            foreach ($columns as $column) {
+                if (Schema::hasColumn('doctor_applications', $column)) {
+                    $table->dropColumn($column);
+                }
+            }
         });
-
-        
     }
 
 

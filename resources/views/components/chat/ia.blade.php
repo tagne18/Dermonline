@@ -52,9 +52,9 @@ const iaSuggestions = document.getElementById('iaSuggestions');
 const suggestions = [
     "Quels sont les symptômes de l'eczéma ?",
     "Comment prévenir l'acné ?",
-    "Quels sont les risques des MST ?",
-    "Comment prendre soin de ma peau ?",
-    "Que faire en cas de démangeaisons ?"
+    //"Quels sont les risques des MST ?",
+    //"Comment prendre soin de ma peau ?",
+    //"Que faire en cas de démangeaisons ?"
 ];
 
 // Affichage suggestions sous forme de boutons
@@ -182,7 +182,7 @@ function escapeHtml(str) {
         position: fixed;
         bottom: 120px;
         right: 30px;
-        width: 350px;
+        width: 450px;
         height: 450px;
         display: none;
         flex-direction: column;
